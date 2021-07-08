@@ -1,0 +1,18 @@
+{
+  "name": "payone",
+  "version": "1.0.0",
+  "description": "A template for kick starting a Cloudflare worker project using [`wasm-pack`](https://github.com/rustwasm/wasm-pack).",
+  "main": "worker/worker.js",
+  "dependencies": {
+    "cloudworker-proxy": "^1.16.1",
+    "path-to-regexp": "^6.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.1.8"
+  },
+  "scripts": {
+    "build": "esbuild --bundle --outfile=worker/worker.js --minify src/js/index.js",
+    "cf:pub": "yarn build && wrangler publish"
+  },
+  "author": "Zoe"
+}

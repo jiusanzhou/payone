@@ -1,0 +1,13 @@
+/target
+**/*.rs.bk
+Cargo.lock
+bin/
+pkg/
+wasm-pack.log
+worker/generated/
+
+# ignore wrangler.toml
+wrangler.toml
+
+node_modules
+yarn.lock
