@@ -148,7 +148,7 @@ const Editor = () => {
                 apis.createItem(code, data).then((r) => {
                     if (r.success) {
                         // route to result page
-                        router.push("/usage?isnew=true")
+                        router.push(`/usage${code}isnew=true`)
                         return
                     }
 
