@@ -1,0 +1,40 @@
+[
+    {
+        "name": "alipay",
+        "title": "支付宝",
+        "ua": "Alipay",
+        "logo": "/assets/img/alipay-logo.svg",
+        "logoFull": "/assets/img/alipay-logo-full.svg",
+        "color": "#00a1e9",
+        "tip": "如未跳转请从浏览器中打开",
+        "url": "https://qr.alipay.com/",
+        "redirect": true
+    },
+    {
+        "name": "wechat",
+        "title": "微信支付",
+        "ua": "MicroMessenger",
+        "logo": "/assets/img/wechat-logo.svg",
+        "color": "#54bc6e",
+        "tip": "☝️ 长按并识别二维码",
+        "url": "wxp://"
+    },
+    {
+        "name": "qq",
+        "title": "QQ钱包",
+        "ua": "QQ/",
+        "logo": "/assets/img/qq-logo.svg",
+        "color": "#faae09",
+        "disable": true,
+        "url": "https://i.qianbao.qq.com/wallet/sqrcode.htm?m=tenpay&a=1&"
+    },
+    {
+        "name": "unionpay",
+        "title": "云闪付",
+        "ua": "UnionPay/",
+        "color": "#e32b25",
+        "logo": "/assets/img/unionpay-logo.png",
+        "disable": true,
+        "url": "https://qr.95516.com/00010000/"
+    }
+]

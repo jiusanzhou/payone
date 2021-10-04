@@ -1,4 +1,4 @@
-name = "proxy"
+name = "payone"
 type = "rust"
 account_id = "{ACCOUNT_ID}"
 zone_id = "{ZONE_ID}"

@@ -1,0 +1,13 @@
+input:checked ~ .dot {
+    transform: translateX(100%);
+}
+input:checked ~ .block {
+    /* @apply: bg-purple-500; */
+    background-color: #48bb78;
+}
+
+.must-line-height::after {
+    content: "";
+    display: inline-block;
+    width: 0px;
+}

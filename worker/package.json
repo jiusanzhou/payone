@@ -1,18 +1,21 @@
 {
   "name": "payone",
   "version": "1.0.0",
-  "description": "A template for kick starting a Cloudflare worker project using [`wasm-pack`](https://github.com/rustwasm/wasm-pack).",
+  "description": "A simple tool for pay QrCode in one place.",
   "main": "worker/worker.js",
+  "license": "LA2",
   "dependencies": {
     "cloudworker-proxy": "^1.16.1",
+    "cloudworker-router": "^1.12.2",
     "path-to-regexp": "^6.1.0"
   },
   "devDependencies": {
-    "esbuild": "^0.1.8"
+    "esbuild": "^0.13.1"
   },
   "scripts": {
     "build": "esbuild --bundle --outfile=worker/worker.js --minify src/js/index.js",
-    "cf:pub": "yarn build && wrangler publish"
+    "cf:pub": "wrangler publish",
+    "cf:dev": "wrangler dev"
   },
   "author": "Zoe"
 }

@@ -1,0 +1,10 @@
+{
+    "regions": ["all"],
+    "functions": {
+      "api/**": {
+        "memory": 3008
+      }
+    },
+    "rewrites": [
+    ]
+}
