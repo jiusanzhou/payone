@@ -27,14 +27,5 @@
         "color": "#faae09",
         "disable": true,
         "url": "https://i.qianbao.qq.com/wallet/sqrcode.htm?m=tenpay&a=1&"
-    },
-    {
-        "name": "unionpay",
-        "title": "云闪付",
-        "ua": "UnionPay/",
-        "color": "#e32b25",
-        "logo": "/assets/img/unionpay-logo.png",
-        "disable": true,
-        "url": "https://qr.95516.com/00010000/"
     }
 ]

@@ -23,7 +23,7 @@ class GitioStore extends Store {
 
         this._keyPrefix = keyPrefix || "payone-";
 
-        this.fetch = fetchWithTimeout; // TODO: replace the fetch
+        this.fetch = fetch; // fetchWithTimeout; // TODO: replace the fetch
     }
 
     // build the target url

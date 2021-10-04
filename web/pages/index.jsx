@@ -20,29 +20,25 @@ const Home = () => {
       title="简单易用"
       leading="⚡"
       description="多个平台收款码，轻轻松松使用合而为一">
-      <ColorBg />
+      {/* <ColorBg /> */}
     </Section>
     <Section position="right" className=""
       title="多个平台"
       leading="🎉"
       description="支持支付宝、微信、QQ等多个收款平台">
-      <ColorBg color="blue" />
+      {/* <ColorBg color="blue" /> */}
     </Section>
     <Section position="left" className=""
       title="完全免费"
       leading="☕"
       description="无需注册、登录，即可享有唯一收款码">
-      <ColorBg color="red">
-        <div className="w-60 rounded-xl p-10">
-          
-        </div>
-      </ColorBg>
+      {/* <ColorBg color="red" /> */}
     </Section>
     <Section position="right" className=""
       title="云端托管"
       leading="☕"
       description="无需开发和托管，立即享有自己的收款页面">
-      <ColorBg color="green" />
+      {/* <ColorBg color="green" /> */}
     </Section>
     <Section className=""
       title="立刻使用"

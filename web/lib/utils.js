@@ -38,7 +38,7 @@ const getChannelByName = (name) => {
 }
 
 const getCodeUrl = (code) => {
-  return settings.endpoint.startsWith("http")?
+  return (settings.endpoint||'').startsWith("http")?
     `${settings.endpoint}/api/s/${code}`:
     `${location.origin}/api/s/${code}`
 }
