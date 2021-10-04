@@ -3,6 +3,6 @@ export default {
     gradient: "bg-gradient-to-r from-green-400 to-blue-500 from-purple-400 to-red-500",
     action: "rounded text-bold text-md px-5 py-2",
 
-    endpoint: "https://payone.wuma.workers.dev", // deploy in to now.sh
+    endpoint: "/", // deploy in to now.sh
     basePath: "/", // or payone to gh-page
 }
