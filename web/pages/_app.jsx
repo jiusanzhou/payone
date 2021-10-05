@@ -9,7 +9,7 @@ import "../styles/core.css";
 const actions = [
   {
     href: '/s/zoe',
-    title: '看看效果'
+    title: '看看示例'
   },
   {
     href: 'https://github.com/jiusanzhou/payone',
