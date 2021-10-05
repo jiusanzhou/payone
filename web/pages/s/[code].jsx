@@ -50,7 +50,7 @@ const CodePage = ({ isPreview, type, sectionProps={}, className="", onQrcode, xd
 
         // handle redirect page, not preview (with don't have type and _type)
         if (!isPreview && channel && data[channel.name] && channel.config.redirect) {
-            // TODO: reload the url
+            // reload the url
             location.href = channel.gen({ code: data[channel.name] })
         }
 
@@ -60,7 +60,7 @@ const CodePage = ({ isPreview, type, sectionProps={}, className="", onQrcode, xd
         // generate the qrcode and set to image
         const url = channel&&data[channel.name] ?
             channel.gen({ code: data[channel.name] }) :
-            code ? getCodeUrl(code) :
+            code ? location.href : // getCodeUrl(code) :
             getBasePath() + "/s?" + Object.keys(xdata).map((k) => `${k}=${encodeURIComponent(xdata[k])}`).join('&');
 
         onQrcode && onQrcode(url);
