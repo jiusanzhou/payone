@@ -3,8 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 import QrScanner from 'qr-scanner'; 
 import qrScannerWorkerSource from '!!raw-loader!../node_modules/qr-scanner/qr-scanner-worker.min.js';
 
-import jsQR from "jsqr";
-
 import Input from "../components/input";
 import Section from "../components/section";
 
