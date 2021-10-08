@@ -4,4 +4,6 @@ export default {
     action: "rounded text-bold text-md px-5 py-2",
 
     basePath: "/", // or payone to gh-page
+
+    GA_TRACKING_ID: process.env.NEXT_PUBLIC_GA_ID,
 }

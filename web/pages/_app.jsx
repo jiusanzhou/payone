@@ -1,8 +1,12 @@
 import 'tailwindcss/tailwind.css'
 import Head from 'next/head'
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 
 import Footer from "../components/footer"
 import Header from "../components/header"
+
+import * as gtag from "../lib/gtag"
 
 import "../styles/core.css";
 
@@ -19,6 +23,18 @@ const actions = [
 
 // layout
 export default function Layout({ Component, pageProps }) {
+
+  const router = useRouter()
+  useEffect(() => {
+    const handleRouteChange = (url) => {
+      gtag.pageview(url)
+    }
+    router.events.on('routeChangeComplete', handleRouteChange)
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange)
+    }
+  }, [router.events])
+
   return <div className="bg-main min-h-screen flex flex-col items-center justify-center">
     <Head>
       <title>{Component.title||'PayOne | 多合一收款码'}</title>
