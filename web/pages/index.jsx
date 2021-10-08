@@ -57,7 +57,7 @@ const Home = () => {
       description="马上就可拥有自己的收款落地页">
       <img src="/assets/img/hero-starup.svg" />
     </Section>
-    <a className="text-gray-400 text-sm p-2" href="https://www.streamlinehq.com">Free illustrations by Streamline</a>
+    <a className="text-gray-400 text-xs p-2 italic" href="https://www.streamlinehq.com">Free illustrations by Streamline</a>
   </div>
 }
 
