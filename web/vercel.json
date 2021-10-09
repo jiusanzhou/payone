@@ -1,4 +1,8 @@
 {
     "rewrites": [
+        {
+            "source": "/s/(?<code>.+?).(?<ext.+>)",
+            "destination": "/api/s/:code.:ext"
+        }
     ]
 }

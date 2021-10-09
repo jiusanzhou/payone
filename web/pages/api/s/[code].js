@@ -2,9 +2,41 @@ import Server from "../../../lib/server";
 
 const svr = new Server();
 
+const screenshotAPI = "https://shot.screenshotapi.net/screenshot";
+
+const getConvertRedirectUrl = (req) => {
+    let { code, type, match, ...args } = req.query
+    const parts = code.split('.')
+    const ext = parts.pop()
+    code = parts.join('.')
+
+    if (!args.width) args.width = 390
+    if (!args.height) args.height = 844
+    if (!args.wait_for_event) args.wait_for_event = "load"
+    if (!args.full_page) args.full_page = true
+    if (!args.output) args.output = "image"
+    if (!args.file_type) args.file_type = ext
+
+    if (match) args.user_agent = req.headers['user-agent']
+
+    let host = req.headers.host
+    if (/localhost|127.0.0.1/.test(host)) host = "payone.wencai.app"
+
+    args.url = `https://${host}/s/${code}?type=${type||''}`
+
+    let x = Object.keys(args).map(key => `${key}=${encodeURIComponent(args[key])}`).join('&')
+    return `${screenshotAPI}?${x}`
+}
+
 export default async function handler(req, res) {
     const { code } = req.query
     if (req.method === 'GET') {
+        // if code has . means we a process to png
+        if (code.indexOf('.') !== -1) {
+            res.redirect(302, getConvertRedirectUrl(req))
+            return;
+        }
+
         const [channel, url, channels, err] = await svr.getItem(code, req.headers['user-agent'])
         if (req.query.type === "json") {
             if (err) {

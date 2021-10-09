@@ -31,7 +31,11 @@ const UsagePage = () => {
         
             <div className="my-10" />
             
-            {/* <h3 className="text-xl font-bold mb-2">二维码图片</h3> */}
+            <h3 className="text-xl font-bold mb-2">二维码图片</h3>
+            <pre className="bg-gray-100 p-3 rounded">{basePath}/s/{code}.png</pre>
+            <div className="mt-4">
+                <img className="rounded-xl ring-4 ring-purple-200" label={`${code}.png`} src={`${basePath}/s/${code}.png`} />
+            </div>
             {/* <h3 className="text-xl font-bold mb-2">页面预览</h3> */}
         </div>
 
