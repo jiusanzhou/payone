@@ -1,4 +1,5 @@
 import Server from "../../../lib/server";
+import screenshotProviders from "../../../lib/screenshot";
 
 const svr = new Server();
 
@@ -28,24 +29,43 @@ const getConvertRedirectUrl = (req) => {
     return `${screenshotAPI}?${x}`
 }
 
+const makeScreenshot = (req, res) => {
+    let { code, app, provider = 'microlink', ...args } = req.query
+    const parts = code.split('.')
+
+    // set extention from code path
+    if (code.indexOf(".") > 0) args.ext = parts.pop() 
+    code = parts.join('.')
+
+    const p = screenshotProviders[provider]
+    if (!p) res.status(500).send('unknown screenshot provider:', provider)
+
+    // get target url
+    let host = req.headers.host
+    if (/localhost|127.0.0.1/.test(host)) host = "payone.wencai.app"
+    const url = `https://${host}/s/${code}?type=${app||''}` // this type is not for api
+
+    // args.isMobile = true
+    args.width = args.width || '640'
+    args.height = args.height || '960'
+    args.device = 'iphone'
+
+    res.redirect(302, p.gen(url, args))
+}
+
 export default async function handler(req, res) {
     const { code, type } = req.query
     if (req.method === 'GET') {
         // if code has . means we a process to png
         if (code.indexOf('.') !== -1 || type === "image") {
-            res.redirect(302, getConvertRedirectUrl(req))
+            // res.redirect(302, getConvertRedirectUrl(req))
+            makeScreenshot(req, res)
             return;
         }
 
         const [channel, url, channels, err] = await svr.getItem(code, req.headers['user-agent'])
         if (type === "json") {
-            if (err) {
-                res.status(200).json({error: err});
-                return;
-            }
-
-            // return json data
-            res.status(200).json({key: code, channel, url, channels});
+            res.status(200).json(err ? {error: err} : {key: code, channel, url, channels});
             return;
         }
 
