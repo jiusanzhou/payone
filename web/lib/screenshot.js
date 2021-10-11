@@ -72,9 +72,6 @@ class Microlink extends Provider {
         waitUntil: 'networkidle2',
         waitForTimeout: '500',
         fullPage: true,
-        screenshot: true,
-        meta: false,
-        embed: 'screenshot.url'
     }
 
     mapKeys = {
@@ -84,11 +81,16 @@ class Microlink extends Provider {
     }
 
     optionsTransformer(options) {
-        const { ext, ...opts } = options
+        const { ext, type, ...opts } = options
         if (opts.device) {
             // unset width and height
             delete opts.width
             delete opts.height
+        }
+
+        if (type === 'image') {
+            opts.screenshot = true
+            opts.embed  = 'screenshot.url'
         }
 
         return opts

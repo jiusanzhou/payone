@@ -49,6 +49,7 @@ const makeScreenshot = (req, res) => {
     args.width = args.width || '640'
     args.height = args.height || '960'
     args.device = 'iphone'
+    args.type = 'image'
 
     res.redirect(302, p.gen(url, args))
 }
