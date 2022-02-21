@@ -17,7 +17,8 @@
         "logo": "/assets/img/wechat-logo.svg",
         "color": "#54bc6e",
         "tip": "☝️ 长按并识别二维码",
-        "url": "wxp://"
+        "url": "wxp://",
+        "redirect": true
     },
     {
         "name": "qq",
