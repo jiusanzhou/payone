@@ -29,45 +29,48 @@ const CodePage = ({ isPreview, type, sectionProps={}, className="", onQrcode, xd
             getChannelByName(type||_type) :
             getChannelByUA(); // use match, ua for preview mode
         setChannel(channel);
-        console.log("=====> channel", channel)
     }, [type, _type])
 
-    useEffect(async () => {
-        if (!router.isReady) return;
+    useEffect(() => {
 
-        let channels = {}
+        let _loadData = async () => {
+            if (!router.isReady) return;
 
-        // load channels from remote
-        if (code) {
-            const item = await apis.getItem(code);
-            channels = item.channels || {};
+            let channels = {}
+
+            // load channels from remote
+            if (code) {
+                const item = await apis.getItem(code);
+                channels = item.channels || {};
+            }
+
+            const data = {...xdata, ...channels, ...args}
+
+            // set data to store
+            setData(data)
+
+            // handle redirect page, not preview (with don't have type and _type)
+            if (!isPreview && channel && data[channel.name] && channel.config.redirect) {
+                // reload the url
+                location.href = channel.gen({ code: data[channel.name] })
+            }
+
+            // set exits or not, except start with _
+            setIsExits(Object.keys(data).filter(key => !key.startsWith("_") && data[key]).length !== 0);
+
+            // generate the qrcode and set to image
+            const url = channel&&data[channel.name] ?
+                channel.gen({ code: data[channel.name] }) :
+                code ? location.href : // getCodeUrl(code) :
+                getBasePath() + "/s?" + Object.keys(xdata).map((k) => `${k}=${encodeURIComponent(xdata[k])}`).join('&');
+
+            onQrcode && onQrcode(url);
+            QRCode.toDataURL(url).then((r) => {
+                setQrcode(r)
+                setWaiting(false)
+            })
         }
-
-        const data = {...xdata, ...channels, ...args}
-
-        // set data to store
-        setData(data)
-
-        // handle redirect page, not preview (with don't have type and _type)
-        if (!isPreview && channel && data[channel.name] && channel.config.redirect) {
-            // reload the url
-            location.href = channel.gen({ code: data[channel.name] })
-        }
-
-        // set exits or not, except start with _
-        setIsExits(Object.keys(data).filter(key => !key.startsWith("_") && data[key]).length !== 0);
-
-        // generate the qrcode and set to image
-        const url = channel&&data[channel.name] ?
-            channel.gen({ code: data[channel.name] }) :
-            code ? location.href : // getCodeUrl(code) :
-            getBasePath() + "/s?" + Object.keys(xdata).map((k) => `${k}=${encodeURIComponent(xdata[k])}`).join('&');
-
-        onQrcode && onQrcode(url);
-        QRCode.toDataURL(url).then((r) => {
-            setQrcode(r)
-            setWaiting(false)
-        })
+        _loadData();
 
     }, [code, xdata, router.isReady])
 

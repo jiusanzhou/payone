@@ -10,6 +10,16 @@ class Store {
     }
 }
 
+class SupabaseStore extends Store {
+    constructor({  }) {
+
+    }
+
+    async put(key, data) {}
+
+    async get(key) {}
+}
+
 class GitioStore extends Store {
     constructor({ host, basicUrl, keyPrefix } = {}) {
         super();
