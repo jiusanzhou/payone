@@ -5,15 +5,21 @@
   "main": "worker/worker.js",
   "license": "LA2",
   "dependencies": {
+    "@resvg/resvg-wasm": "^2.6.2",
     "cloudworker-proxy": "^1.16.1",
-    "cloudworker-router": "^1.12.2",
-    "path-to-regexp": "^6.1.0"
+    "cloudworker-router": "^4.1.5",
+    "path-to-regexp": "^8.3.0",
+    "satori": "^0.12.0",
+    "yoga-wasm-web": "^0.3.3"
   },
   "devDependencies": {
-    "esbuild": "^0.13.1"
+    "@cloudflare/workers-types": "^4.20250124.0",
+    "esbuild": "^0.25.5",
+    "typescript": "^5.7.3"
   },
   "scripts": {
-    "build": "esbuild --bundle --outfile=worker/worker.js --minify src/js/index.js",
+    "build": "esbuild --bundle --outfile=worker/worker.js --minify --define:process.env.NODE_ENV=\\\"production\\\" --inject:./src/ts/shim.ts --format=esm --loader:.wasm=file --asset-names=[name] src/ts/index.ts",
+    "typecheck": "tsc --noEmit",
     "cf:pub": "wrangler publish",
     "cf:dev": "wrangler dev"
   },

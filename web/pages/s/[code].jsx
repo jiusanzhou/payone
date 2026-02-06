@@ -29,46 +29,41 @@ const CodePage = ({ isPreview, type, sectionProps={}, className="", onQrcode, xd
             getChannelByName(type||_type) :
             getChannelByUA(); // use match, ua for preview mode
         setChannel(channel);
-        console.log("=====> channel", channel)
     }, [type, _type])
 
-    useEffect(async () => {
-        if (!router.isReady) return;
+    useEffect(() => {
+        const loadData = async () => {
+            if (!router.isReady) return;
 
-        let channels = {}
+            let channels = {}
 
-        // load channels from remote
-        if (code) {
-            const item = await apis.getItem(code);
-            channels = item.channels || {};
+            if (code) {
+                const item = await apis.getItem(code);
+                channels = item.channels || {};
+            }
+
+            const data = {...xdata, ...channels, ...args}
+
+            setData(data)
+
+            if (!isPreview && channel && data[channel.name] && channel.config.redirect) {
+                location.href = channel.gen({ code: data[channel.name] })
+            }
+
+            setIsExits(Object.keys(data).filter(key => !key.startsWith("_") && data[key]).length !== 0);
+
+            const url = channel&&data[channel.name] ?
+                channel.gen({ code: data[channel.name] }) :
+                code ? location.href :
+                getBasePath() + "/s?" + Object.keys(xdata).map((k) => `${k}=${encodeURIComponent(xdata[k])}`).join('&');
+
+            onQrcode && onQrcode(url);
+            QRCode.toDataURL(url).then((r) => {
+                setQrcode(r)
+                setWaiting(false)
+            })
         }
-
-        const data = {...xdata, ...channels, ...args}
-
-        // set data to store
-        setData(data)
-
-        // handle redirect page, not preview (with don't have type and _type)
-        if (!isPreview && channel && data[channel.name] && channel.config.redirect) {
-            // reload the url
-            location.href = channel.gen({ code: data[channel.name] })
-        }
-
-        // set exits or not, except start with _
-        setIsExits(Object.keys(data).filter(key => !key.startsWith("_") && data[key]).length !== 0);
-
-        // generate the qrcode and set to image
-        const url = channel&&data[channel.name] ?
-            channel.gen({ code: data[channel.name] }) :
-            code ? location.href : // getCodeUrl(code) :
-            getBasePath() + "/s?" + Object.keys(xdata).map((k) => `${k}=${encodeURIComponent(xdata[k])}`).join('&');
-
-        onQrcode && onQrcode(url);
-        QRCode.toDataURL(url).then((r) => {
-            setQrcode(r)
-            setWaiting(false)
-        })
-
+        loadData()
     }, [code, xdata, router.isReady])
 
     if (waiting) return <Section className="justify-center" {...sectionProps}>
@@ -78,7 +73,28 @@ const CodePage = ({ isPreview, type, sectionProps={}, className="", onQrcode, xd
         </span>
     </Section>
 
-    if (!isExits) return <Section className="justify-center" {...sectionProps} leading="😱" description="收款码不存在" />
+    if (!isExits) return (
+        <Section className="justify-center" {...sectionProps}>
+            <div className="flex flex-col items-center text-center px-6">
+                <div className="w-24 h-24 mb-6 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                    <svg className="w-12 h-12 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">收款码不存在</h2>
+                <p className="text-gray-500 mb-6 max-w-xs">该收款码可能已过期或从未创建，请检查链接是否正确</p>
+                <a href="/" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-medium shadow-lg shadow-purple-200 hover:shadow-xl hover:scale-105 transition-all">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    创建收款码
+                </a>
+            </div>
+            <Head>
+                <title>收款码不存在 | PayOne</title>
+            </Head>
+        </Section>
+    )
 
     return <Section className={`justify-center select-none ${className}`} {...sectionProps}
         description={(!channel||data[channel.name])?data._excerpt:"仅支持以上付款方式 ☝️"}
@@ -87,20 +103,20 @@ const CodePage = ({ isPreview, type, sectionProps={}, className="", onQrcode, xd
             (!channel || (data[channel.name]?name===channel.name:data[name]))) // all or matched one
             .map(({ name, title, logo, logoFull }) => <div key={name}
                 className="flex items-center">
-                <img className="h-10" src={channel&&data[channel.name]?logoFull||logo:logo} />
+                <img className="h-10" src={channel&&data[channel.name]?logoFull||logo:logo} alt={title} />
                 {channel&&data[channel.name]&&!logoFull&&<p className="ml-2 text-md">{title}</p>}
             </div>)}
         </div>}>
         <div style={{backgroundColor: channel&&channel.config.color}}
-            className="flex flex-col items-center w-full max-w-xs p-5 bg-purple-400 text-white rounded-md">
+            className="flex flex-col items-center w-full max-w-xs p-6 bg-purple-400 text-white rounded-2xl backdrop-blur-xl bg-opacity-80 shadow-xl">
             {/* subtitle */}
             <p className="font-bold text-xl must-line-height">{data._subtitle||''}</p>
             {/* qrcode */}
-            <div className="w-2/3 max-w-60 max-h-60 bg-white my-5 md:my-10">
-                <img className="w-full h-full" src={qrcode} />
+            <div className="w-2/3 max-w-60 max-h-60 bg-white/95 backdrop-blur-sm my-5 md:my-8 rounded-xl p-3 shadow-lg">
+                <img className="w-full h-full rounded-lg" src={qrcode} alt="QR Code" />
             </div>
             {/* footer */}
-            <p className="w-48 must-line-height">{(channel?
+            <p className="w-48 must-line-height text-white/90">{(channel?
                 data[channel.name]?
                     data._tip||channel.config.tip:
                     `暂不支持「${channel.config.title}」付款`:

@@ -34,9 +34,9 @@ const Section = ({
     full,
     title, leading, description, action,
     position="center", className,
-    children }) => {
+    children, ...props }) => {
     const _p = _positions[position];
-    return <div className={`${full?"w-full":settings.w} relative my-0 md:my-10 py-10 md:py-10 px-4 md:px-0 flex flex-col items-center text-center ${_p.wrapper} ${className}`}>
+    return <div {...props} className={`${full?"w-full":settings.w} relative my-0 md:my-10 py-10 md:py-10 px-4 md:px-0 flex flex-col items-center text-center ${_p.wrapper} ${className}`}>
         {/* text */}
         <div className={`text-center ${_p.text}`}>
             {/* title */}

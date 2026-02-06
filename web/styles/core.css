@@ -1,8 +1,36 @@
+@import "tailwindcss";
+
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: rgba(229, 231, 235, var(--tw-border-opacity, 1));
+    }
+}
+
+@layer utilities {
+    .animate-fade-in {
+        animation: fadeIn 0.2s ease-out;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 input:checked ~ .dot {
     transform: translateX(100%);
 }
 input:checked ~ .block {
-    /* @apply: bg-purple-500; */
     background-color: #48bb78;
 }
 
@@ -10,4 +38,8 @@ input:checked ~ .block {
     content: "";
     display: inline-block;
     width: 0px;
+}
+
+@theme {
+    --background-size-main: cover;
 }

@@ -1,10 +1,10 @@
-import 'tailwindcss/tailwind.css'
 import Head from 'next/head'
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
 import Footer from "../components/footer"
 import Header from "../components/header"
+import ToastContainer from "../components/toast"
 
 import * as gtag from "../lib/gtag"
 
@@ -35,17 +35,20 @@ export default function Layout({ Component, pageProps }) {
     }
   }, [router.events])
 
-  return <div className="bg-main min-h-screen flex flex-col items-center justify-center">
+  const bgClass = Component.fullBackground || 'bg-main'
+
+  return <div className={`${bgClass} min-h-screen flex flex-col items-center justify-center`}>
     <Head>
       <title>{Component.title||'PayOne | 多合一收款码'}</title>
       <link rel="icon" href="/favicon.ico" />
       <meta name="description" content="简单地生成多合一的收款码"/>
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"></meta>
     </Head>
+    <ToastContainer />
     {Component.noHeader!==true&&<Header actions={actions} />}
     <main className="flex flex-1 w-full justify-center">
       {<Component {...pageProps} />}
     </main>
-    <Footer powered={Component.powered}/>
+    <Footer powered={Component.powered} transparent={!!Component.fullBackground}/>
   </div>
 }

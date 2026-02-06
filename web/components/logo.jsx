@@ -5,7 +5,7 @@ const Logo = ({
     img="/assets/img/payone-logo.svg",
     title="PayOne" }) => {
     return <a className="flex items-center" href={link}>
-        <img className="w-8 h-8 rounded mr-2" src={img} />
+        <img className="w-8 h-8 rounded mr-2" src={img} alt={title} />
         <strong className={`bg-clip-text text-transparent ${settings.gradient}`}>{title}</strong>
     </a>
 }
