@@ -443,18 +443,22 @@ export class SatoriProvider implements ScreenshotProvider {
     }
 
     private renderMinimal(data: ScreenshotData): any {
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(data.pageUrl)}`
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.pageUrl)}`
         return {
             type: 'div',
             props: {
-                style: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fafafa', padding: 48 },
+                style: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding: 40 },
                 children: [
                     { type: 'div', props: { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, justifyContent: 'center' }, children: [
-                        { type: 'div', props: { style: { display: 'flex', backgroundColor: 'white', borderRadius: 8, padding: 16, border: '1px solid #e5e5e5' }, children: { type: 'img', props: { src: qrUrl, width: 220, height: 220 } } } },
-                        { type: 'div', props: { style: { display: 'flex', gap: 12, marginTop: 24 }, children: data.channels.map(ch => ({ type: 'img', props: { src: ch.logo, width: 28, height: 28 } })) } },
-                        data.subtitle ? { type: 'div', props: { style: { display: 'flex', fontSize: 14, color: '#737373', marginTop: 16 }, children: data.subtitle } } : null
+                        { type: 'div', props: { style: { display: 'flex', gap: 16, marginBottom: 8 }, children: data.channels.map(ch => ({ type: 'img', props: { src: ch.logo, width: 40, height: 40 } })) } },
+                        data.excerpt ? { type: 'div', props: { style: { display: 'flex', fontSize: 16, color: '#6b7280', marginTop: 16, marginBottom: 20 }, children: data.excerpt } } : null,
+                        { type: 'div', props: { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 16, padding: 24, border: '1px solid #e5e5e5' }, children: [
+                            data.subtitle ? { type: 'div', props: { style: { display: 'flex', fontSize: 20, fontWeight: 'bold', color: '#374151', marginBottom: 16 }, children: data.subtitle } } : null,
+                            { type: 'div', props: { style: { display: 'flex', backgroundColor: 'white', borderRadius: 12, padding: 12, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }, children: { type: 'img', props: { src: qrUrl, width: 180, height: 180 } } } },
+                            { type: 'div', props: { style: { display: 'flex', fontSize: 14, color: '#6b7280', marginTop: 16 }, children: '请打开支持的付款软件并扫一扫' } }
+                        ].filter(Boolean) } }
                     ].filter(Boolean) } },
-                    this.renderFooter('#a3a3a3')
+                    this.renderFooter('#9ca3af')
                 ]
             }
         }
@@ -465,54 +469,62 @@ export class SatoriProvider implements ScreenshotProvider {
         return {
             type: 'div',
             props: {
-                style: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)', padding: 48 },
+                style: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding: 40 },
                 children: [
                     { type: 'div', props: { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, justifyContent: 'center' }, children: [
-                        data.title ? { type: 'div', props: { style: { display: 'flex', fontSize: 28, fontWeight: 'bold', color: 'white', marginBottom: 8, textShadow: '0 2px 10px rgba(0,0,0,0.2)' }, children: data.title } } : null,
-                        data.excerpt ? { type: 'div', props: { style: { display: 'flex', fontSize: 16, color: 'rgba(255,255,255,0.85)', marginBottom: 24 }, children: data.excerpt } } : null,
-                        { type: 'div', props: { style: { display: 'flex', backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 24, padding: 20, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)' }, children: { type: 'img', props: { src: qrUrl, width: 200, height: 200 } } } },
-                        { type: 'div', props: { style: { display: 'flex', gap: 16, marginTop: 28 }, children: data.channels.map(ch => ({ type: 'div', props: { style: { display: 'flex', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 12, padding: 10 }, children: { type: 'img', props: { src: ch.logo, width: 32, height: 32 } } } })) } }
+                        { type: 'div', props: { style: { display: 'flex', gap: 16, marginBottom: 8 }, children: data.channels.map(ch => ({ type: 'img', props: { src: ch.logo, width: 40, height: 40 } })) } },
+                        data.excerpt ? { type: 'div', props: { style: { display: 'flex', fontSize: 16, color: '#6b7280', marginTop: 16, marginBottom: 20 }, children: data.excerpt } } : null,
+                        { type: 'div', props: { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f97316 100%)', borderRadius: 16, padding: 24, color: 'white', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }, children: [
+                            data.subtitle ? { type: 'div', props: { style: { display: 'flex', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }, children: data.subtitle } } : null,
+                            { type: 'div', props: { style: { display: 'flex', backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 12, padding: 12, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }, children: { type: 'img', props: { src: qrUrl, width: 180, height: 180 } } } },
+                            { type: 'div', props: { style: { display: 'flex', fontSize: 14, opacity: 0.9, marginTop: 16 }, children: '请打开支持的付款软件并扫一扫' } }
+                        ].filter(Boolean) } }
                     ].filter(Boolean) } },
-                    this.renderFooter('rgba(255,255,255,0.7)')
+                    this.renderFooter('#6b7280')
                 ]
             }
         }
     }
 
     private renderDark(data: ScreenshotData): any {
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(data.pageUrl)}`
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.pageUrl)}`
         return {
             type: 'div',
             props: {
-                style: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f0f0f', padding: 48 },
+                style: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding: 40 },
                 children: [
                     { type: 'div', props: { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, justifyContent: 'center' }, children: [
-                        data.title ? { type: 'div', props: { style: { display: 'flex', fontSize: 26, fontWeight: 'bold', color: '#ffffff', marginBottom: 8 }, children: data.title } } : null,
-                        data.excerpt ? { type: 'div', props: { style: { display: 'flex', fontSize: 15, color: '#a1a1aa', marginBottom: 24 }, children: data.excerpt } } : null,
-                        { type: 'div', props: { style: { display: 'flex', backgroundColor: '#1a1a1a', borderRadius: 20, padding: 20, border: '1px solid #2a2a2a' }, children: { type: 'div', props: { style: { display: 'flex', backgroundColor: '#ffffff', borderRadius: 12, padding: 12 }, children: { type: 'img', props: { src: qrUrl, width: 180, height: 180 } } } } } },
-                        { type: 'div', props: { style: { display: 'flex', gap: 12, marginTop: 24 }, children: data.channels.map(ch => ({ type: 'div', props: { style: { display: 'flex', backgroundColor: '#1f1f1f', borderRadius: 10, padding: 8, border: '1px solid #333' }, children: { type: 'img', props: { src: ch.logo, width: 28, height: 28 } } } })) } },
-                        data.subtitle ? { type: 'div', props: { style: { display: 'flex', fontSize: 13, color: '#71717a', marginTop: 20 }, children: data.subtitle } } : null
+                        { type: 'div', props: { style: { display: 'flex', gap: 16, marginBottom: 8 }, children: data.channels.map(ch => ({ type: 'img', props: { src: ch.logo, width: 40, height: 40 } })) } },
+                        data.excerpt ? { type: 'div', props: { style: { display: 'flex', fontSize: 16, color: '#6b7280', marginTop: 16, marginBottom: 20 }, children: data.excerpt } } : null,
+                        { type: 'div', props: { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#1f2937', borderRadius: 16, padding: 24, color: 'white', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }, children: [
+                            data.subtitle ? { type: 'div', props: { style: { display: 'flex', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }, children: data.subtitle } } : null,
+                            { type: 'div', props: { style: { display: 'flex', backgroundColor: 'white', borderRadius: 12, padding: 12, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }, children: { type: 'img', props: { src: qrUrl, width: 180, height: 180 } } } },
+                            { type: 'div', props: { style: { display: 'flex', fontSize: 14, color: '#9ca3af', marginTop: 16 }, children: '请打开支持的付款软件并扫一扫' } }
+                        ].filter(Boolean) } }
                     ].filter(Boolean) } },
-                    this.renderFooter('#52525b')
+                    this.renderFooter('#6b7280')
                 ]
             }
         }
     }
 
     private renderNeon(data: ScreenshotData): any {
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(data.pageUrl)}`
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.pageUrl)}`
         return {
             type: 'div',
             props: {
-                style: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a0a', padding: 48 },
+                style: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding: 40 },
                 children: [
                     { type: 'div', props: { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, justifyContent: 'center' }, children: [
-                        data.title ? { type: 'div', props: { style: { display: 'flex', fontSize: 28, fontWeight: 'bold', color: '#00ff88', marginBottom: 8, textShadow: '0 0 20px rgba(0,255,136,0.5), 0 0 40px rgba(0,255,136,0.3)' }, children: data.title } } : null,
-                        data.excerpt ? { type: 'div', props: { style: { display: 'flex', fontSize: 15, color: '#888', marginBottom: 24 }, children: data.excerpt } } : null,
-                        { type: 'div', props: { style: { display: 'flex', borderRadius: 20, padding: 4, background: 'linear-gradient(135deg, #00ff88, #00d4ff, #ff00ff)' }, children: { type: 'div', props: { style: { display: 'flex', backgroundColor: '#0a0a0a', borderRadius: 16, padding: 16 }, children: { type: 'div', props: { style: { display: 'flex', backgroundColor: '#ffffff', borderRadius: 8, padding: 8 }, children: { type: 'img', props: { src: qrUrl, width: 180, height: 180 } } } } } } } },
-                        { type: 'div', props: { style: { display: 'flex', gap: 16, marginTop: 28 }, children: data.channels.map(ch => ({ type: 'div', props: { style: { display: 'flex', borderRadius: 12, padding: 2, background: 'linear-gradient(135deg, #00ff88, #00d4ff)' }, children: { type: 'div', props: { style: { display: 'flex', backgroundColor: '#0a0a0a', borderRadius: 10, padding: 8 }, children: { type: 'img', props: { src: ch.logo, width: 28, height: 28 } } } } } })) } }
+                        { type: 'div', props: { style: { display: 'flex', gap: 16, marginBottom: 8 }, children: data.channels.map(ch => ({ type: 'img', props: { src: ch.logo, width: 40, height: 40 } })) } },
+                        data.excerpt ? { type: 'div', props: { style: { display: 'flex', fontSize: 16, color: '#6b7280', marginTop: 16, marginBottom: 20 }, children: data.excerpt } } : null,
+                        { type: 'div', props: { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#0a0a0a', borderRadius: 16, padding: 24, boxShadow: '0 0 30px rgba(74, 222, 128, 0.3), 0 25px 50px -12px rgba(0, 0, 0, 0.25)', border: '1px solid rgba(74, 222, 128, 0.5)' }, children: [
+                            data.subtitle ? { type: 'div', props: { style: { display: 'flex', fontSize: 20, fontWeight: 'bold', color: '#4ade80', marginBottom: 16, textShadow: '0 0 10px rgba(74, 222, 128, 0.5)' }, children: data.subtitle } } : null,
+                            { type: 'div', props: { style: { display: 'flex', borderRadius: 14, padding: 3, background: 'linear-gradient(135deg, #4ade80, #22d3ee, #a855f7)' }, children: { type: 'div', props: { style: { display: 'flex', backgroundColor: 'white', borderRadius: 11, padding: 12 }, children: { type: 'img', props: { src: qrUrl, width: 180, height: 180 } } } } } },
+                            { type: 'div', props: { style: { display: 'flex', fontSize: 14, color: '#4ade80', marginTop: 16 }, children: '请打开支持的付款软件并扫一扫' } }
+                        ].filter(Boolean) } }
                     ].filter(Boolean) } },
-                    this.renderFooter('#00ff88')
+                    this.renderFooter('#4ade80')
                 ]
             }
         }
