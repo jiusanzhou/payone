@@ -1,13 +1,29 @@
-import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import useWindowSize from 'react-use/lib/useWindowSize'
 import Confetti from 'react-confetti'
-import Link from "../../components/link"
-import { getBasePath } from "../../lib/utils"
-import { showToast } from "../../components/toast"
-import { registry } from "../../lib/screenshot"
+import type { GetServerSideProps } from 'next'
+import Link from '../../components/link'
+import { getBasePath } from '../../lib/utils'
+import { showToast } from '../../components/toast'
+import { registry } from '../../lib/screenshot'
 
-const ALL_PROVIDERS = [
+interface Provider {
+    id: string
+    name: string
+}
+
+interface Layout {
+    id: string
+    name: string
+}
+
+interface ColorTheme {
+    id: string
+    name: string
+}
+
+const ALL_PROVIDERS: Provider[] = [
     { id: 'worker', name: 'Worker' },
     { id: 'thumio', name: 'Thum.io' },
     { id: 'microlink', name: 'Microlink' },
@@ -15,12 +31,12 @@ const ALL_PROVIDERS = [
     { id: 'apiflash', name: 'ApiFlash' },
 ]
 
-const LAYOUTS = [
+const LAYOUTS: Layout[] = [
     { id: 'default', name: '竖版' },
     { id: 'banner', name: '横幅' },
 ]
 
-const COLOR_THEMES = [
+const COLOR_THEMES: ColorTheme[] = [
     { id: 'default', name: '默认' },
     { id: 'minimal', name: '极简' },
     { id: 'gradient', name: '渐变' },
@@ -28,7 +44,11 @@ const COLOR_THEMES = [
     { id: 'neon', name: '霓虹' },
 ]
 
-export async function getServerSideProps() {
+interface UsagePageProps {
+    availableProviders: string[]
+}
+
+export const getServerSideProps: GetServerSideProps<UsagePageProps> = async () => {
     const availableProviders = registry.list()
     return {
         props: {
@@ -37,59 +57,63 @@ export async function getServerSideProps() {
     }
 }
 
-const UsagePage = ({ availableProviders = [] }) => {
+interface UsagePageComponent extends React.FC<UsagePageProps> {
+    title?: string
+}
+
+const UsagePage: UsagePageComponent = ({ availableProviders = [] }) => {
     const router = useRouter()
     const { code, isnew } = router.query
 
-    const providers = ALL_PROVIDERS.filter(p => availableProviders.includes(p.id))
+    const providers = ALL_PROVIDERS.filter((p) => availableProviders.includes(p.id))
 
-    const [basePath, setBasePath] = useState("")
-    const [copied, setCopied] = useState(null)
+    const [basePath, setBasePath] = useState('')
+    const [copied, setCopied] = useState<string | null>(null)
     const [provider, setProvider] = useState('worker')
     const [layout, setLayout] = useState('default')
     const [colorTheme, setColorTheme] = useState('default')
     const [imageKey, setImageKey] = useState(0)
     const [imageLoading, setImageLoading] = useState(true)
-    
+
     useEffect(() => {
         setBasePath(getBasePath())
     }, [])
 
     const { width, height } = useWindowSize()
-    
+
     const isBanner = layout === 'banner'
     const layoutParam = isBanner ? 'layout=banner' : ''
     const themeParam = colorTheme !== 'default' ? `theme=${colorTheme}` : ''
-    
+
     const pageQueryParams = [layoutParam, themeParam].filter(Boolean).join('&')
     const pageQueryString = pageQueryParams ? `?${pageQueryParams}` : ''
     const pageUrl = `${basePath}/s/${code}${pageQueryString}`
-    
+
     const providerParam = provider !== 'worker' ? `provider=${provider}` : ''
     const imageQueryParams = [layoutParam, themeParam, providerParam].filter(Boolean).join('&')
     const imageQueryString = imageQueryParams ? `?${imageQueryParams}` : ''
-    
+
     const currentImageUrl = `${basePath}/s/${code}.png${imageQueryString}`
 
-    const handleProviderChange = (newProvider) => {
+    const handleProviderChange = (newProvider: string) => {
         setProvider(newProvider)
-        setImageKey(prev => prev + 1)
+        setImageKey((prev) => prev + 1)
         setImageLoading(true)
     }
 
-    const handleLayoutChange = (newLayout) => {
+    const handleLayoutChange = (newLayout: string) => {
         setLayout(newLayout)
-        setImageKey(prev => prev + 1)
+        setImageKey((prev) => prev + 1)
         setImageLoading(true)
     }
 
-    const handleColorThemeChange = (newColorTheme) => {
+    const handleColorThemeChange = (newColorTheme: string) => {
         setColorTheme(newColorTheme)
-        setImageKey(prev => prev + 1)
+        setImageKey((prev) => prev + 1)
         setImageLoading(true)
     }
 
-    const copyToClipboard = (text, type) => {
+    const copyToClipboard = (text: string, type: string) => {
         navigator.clipboard.writeText(text).then(() => {
             setCopied(type)
             showToast('已复制到剪贴板', 'success')
@@ -99,21 +123,11 @@ const UsagePage = ({ availableProviders = [] }) => {
 
     return (
         <div className="w-full max-w-2xl mx-auto px-6 py-12">
-            {isnew && (
-                <Confetti
-                    style={{ position: "fixed" }}
-                    width={width}
-                    height={height}
-                    recycle={false}
-                    numberOfPieces={200}
-                />
-            )}
+            {isnew && <Confetti style={{ position: 'fixed' }} width={width} height={height} recycle={false} numberOfPieces={200} />}
 
             <div className="text-center mb-10">
                 {isnew && <div className="text-5xl mb-4">🎉</div>}
-                <h1 className="text-3xl font-bold mb-3">
-                    {isnew ? '创建成功！' : '收款码详情'}
-                </h1>
+                <h1 className="text-3xl font-bold mb-3">{isnew ? '创建成功！' : '收款码详情'}</h1>
                 <p className="text-gray-500">
                     你的专属ID: <code className="px-2 py-1 bg-purple-100 text-purple-600 rounded font-mono">{code}</code>
                 </p>
@@ -127,9 +141,7 @@ const UsagePage = ({ availableProviders = [] }) => {
                             <button
                                 onClick={() => copyToClipboard(pageUrl, 'page')}
                                 className={`text-sm px-3 py-1 rounded-full transition-colors ${
-                                    copied === 'page' 
-                                        ? 'bg-green-100 text-green-600' 
-                                        : 'bg-gray-100 text-gray-600 hover:bg-purple-100 hover:text-purple-600'
+                                    copied === 'page' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 hover:bg-purple-100 hover:text-purple-600'
                                 }`}
                             >
                                 {copied === 'page' ? '已复制 ✓' : '复制链接'}
@@ -144,9 +156,7 @@ const UsagePage = ({ availableProviders = [] }) => {
                             </a>
                         </div>
                     </div>
-                    <div className="bg-gray-50 rounded-xl p-4 font-mono text-sm text-gray-600 break-all">
-                        {pageUrl}
-                    </div>
+                    <div className="bg-gray-50 rounded-xl p-4 font-mono text-sm text-gray-600 break-all">{pageUrl}</div>
 
                     <hr className="my-6 border-gray-100" />
 
@@ -156,9 +166,7 @@ const UsagePage = ({ availableProviders = [] }) => {
                             <button
                                 onClick={() => copyToClipboard(currentImageUrl, 'image')}
                                 className={`text-sm px-3 py-1 rounded-full transition-colors ${
-                                    copied === 'image' 
-                                        ? 'bg-green-100 text-green-600' 
-                                        : 'bg-gray-100 text-gray-600 hover:bg-purple-100 hover:text-purple-600'
+                                    copied === 'image' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 hover:bg-purple-100 hover:text-purple-600'
                                 }`}
                             >
                                 {copied === 'image' ? '已复制 ✓' : '复制链接'}
@@ -184,9 +192,7 @@ const UsagePage = ({ availableProviders = [] }) => {
                                             key={l.id}
                                             onClick={() => handleLayoutChange(l.id)}
                                             className={`flex-1 px-3 py-2 rounded-lg text-sm transition-all ${
-                                                layout === l.id
-                                                    ? 'bg-purple-500 text-white shadow-sm'
-                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                layout === l.id ? 'bg-purple-500 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}
                                         >
                                             {l.name}
@@ -202,9 +208,7 @@ const UsagePage = ({ availableProviders = [] }) => {
                                             key={t.id}
                                             onClick={() => handleColorThemeChange(t.id)}
                                             className={`flex-1 px-2 py-2 rounded-lg text-sm transition-all ${
-                                                colorTheme === t.id
-                                                    ? 'bg-purple-500 text-white shadow-sm'
-                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                colorTheme === t.id ? 'bg-purple-500 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}
                                         >
                                             {t.name}
@@ -213,7 +217,7 @@ const UsagePage = ({ availableProviders = [] }) => {
                                 </div>
                             </div>
                         </div>
-                  <div>
+                        <div>
                             <label className="text-xs text-gray-500 mb-2 block">截图服务</label>
                             <div className="flex gap-1">
                                 {providers.map((p) => (
@@ -221,9 +225,7 @@ const UsagePage = ({ availableProviders = [] }) => {
                                         key={p.id}
                                         onClick={() => handleProviderChange(p.id)}
                                         className={`flex-1 px-2 py-2 rounded-lg text-xs transition-all ${
-                                            provider === p.id
-                                                ? 'bg-purple-500 text-white shadow-sm'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            provider === p.id ? 'bg-purple-500 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                         }`}
                                     >
                                         {p.name}
@@ -233,9 +235,7 @@ const UsagePage = ({ availableProviders = [] }) => {
                         </div>
                     </div>
 
-                    <div className="bg-gray-50 rounded-xl p-4 font-mono text-sm text-gray-600 break-all mb-4">
-                        {currentImageUrl}
-                    </div>
+                    <div className="bg-gray-50 rounded-xl p-4 font-mono text-sm text-gray-600 break-all mb-4">{currentImageUrl}</div>
 
                     <div className={`p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl ${isBanner ? '' : 'flex justify-center'}`}>
                         <div className={`relative ${isBanner ? 'w-full' : 'w-[280px]'}`} style={{ aspectRatio: isBanner ? '1200/630' : '640/960' }}>
@@ -258,18 +258,11 @@ const UsagePage = ({ availableProviders = [] }) => {
                         </div>
                     </div>
 
-                    {isBanner && (
-                        <p className="text-xs text-gray-400 mt-3 text-center">
-                            适用于 GitHub README 等场景
-                        </p>
-                    )}
+                    {isBanner && <p className="text-xs text-gray-400 mt-3 text-center">适用于 GitHub README 等场景</p>}
                 </div>
 
                 <div className="text-center pt-4">
-                    <Link
-                        href="/editor"
-                        className="text-gray-400 hover:text-purple-500 text-sm"
-                    >
+                    <Link href="/editor" className="text-gray-400 hover:text-purple-500 text-sm">
                         ← 创建新的收款码
                     </Link>
                 </div>
@@ -278,6 +271,6 @@ const UsagePage = ({ availableProviders = [] }) => {
     )
 }
 
-UsagePage.title = "收款码详情 | PayOne"
+UsagePage.title = '收款码详情 | PayOne'
 
 export default UsagePage
