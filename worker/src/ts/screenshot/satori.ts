@@ -340,7 +340,7 @@ export class SatoriProvider implements ScreenshotProvider {
                                 flex: 1,
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                padding: 40,
+                                padding: 32,
                             },
                             children: {
                                 type: 'div',
@@ -348,7 +348,7 @@ export class SatoriProvider implements ScreenshotProvider {
                                     style: {
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: 48,
+                                        gap: 32,
                                         backgroundColor: t.cardBg,
                                         borderRadius: 24,
                                         padding: '32px 40px',
@@ -376,19 +376,19 @@ export class SatoriProvider implements ScreenshotProvider {
                                         {
                                             type: 'div',
                                             props: {
-                                                style: { display: 'flex', flexDirection: 'column', gap: 12 },
+                                                style: { display: 'flex', flexDirection: 'column' },
                                                 children: [
                                                     {
                                                         type: 'div',
                                                         props: {
-                                                            style: { display: 'flex', fontSize: 30, fontWeight: 'bold', color: t.titleColor },
+                                                            style: { display: 'flex', fontSize: 30, fontWeight: 'bold', color: t.titleColor, marginBottom: 8 },
                                                             children: data.title || '支持我们',
                                                         },
                                                     },
                                                     data.excerpt ? {
                                                         type: 'div',
                                                         props: {
-                                                            style: { display: 'flex', fontSize: 16, color: t.textColor },
+                                                            style: { display: 'flex', fontSize: 16, color: t.textColor, marginBottom: 16 },
                                                             children: data.excerpt,
                                                         },
                                                     } : null,
