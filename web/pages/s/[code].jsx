@@ -88,47 +88,47 @@ const BannerLayout = ({ data, qrcode, activeChannels, colorTheme = 'default' }) 
     const style = BANNER_THEME_STYLES[colorTheme] || BANNER_THEME_STYLES.default
     
     return (
-        <div className={`flex-1 flex items-center justify-center p-8 min-h-screen ${style.containerBg}`}>
+        <div className={`flex-1 flex items-center justify-center p-6 md:p-8 ${style.containerBg}`}>
             <Head>
                 <title>{data._title || '支持我们'} | PayOne</title>
             </Head>
-            <div className={`backdrop-blur rounded-3xl shadow-2xl p-8 md:p-10 max-w-3xl w-full ${style.cardBg} ${style.border || ''} ${style.shadow || ''}`}>
-                <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className={`backdrop-blur rounded-3xl shadow-2xl p-6 md:p-8 max-w-3xl w-full ${style.cardBg} ${style.border || ''} ${style.shadow || ''}`}>
+                <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
                     <div className="flex-shrink-0">
-                        <div className="bg-white rounded-2xl p-3 shadow-lg ring-1 ring-gray-100">
+                        <div className="bg-white rounded-2xl p-2 md:p-3 shadow-lg ring-1 ring-gray-100">
                             {qrcode && (
                                 <img 
                                     src={qrcode} 
                                     alt="收款二维码"
-                                    className="w-40 h-40 md:w-48 md:h-48"
+                                    className="w-32 h-32 md:w-40 md:h-40"
                                 />
                             )}
                         </div>
                     </div>
                     
                     <div className="flex-1 text-center md:text-left">
-                        <h1 className={`text-2xl md:text-3xl font-bold mb-2 ${style.titleColor}`}>
+                        <h1 className={`text-xl md:text-2xl font-bold mb-1 md:mb-2 ${style.titleColor}`}>
                             {data._title || '支持我们'}
                         </h1>
                         {data._excerpt && (
-                            <p className={`mb-4 ${style.textColor}`}>{data._excerpt}</p>
+                            <p className={`text-sm md:text-base mb-3 md:mb-4 ${style.textColor}`}>{data._excerpt}</p>
                         )}
                         
-                        <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
+                        <div className="flex flex-wrap justify-center md:justify-start gap-2 md:gap-3 mt-3 md:mt-4">
                             {activeChannels.map(({ name, title, logo, color }) => (
                                 <div 
                                     key={name}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-full"
+                                    className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full"
                                     style={{ backgroundColor: colorTheme === 'dark' || colorTheme === 'neon' ? `${color}30` : `${color}20` }}
                                 >
-                                    <img src={logo} alt={title} className="w-5 h-5" />
-                                    <span className={`text-sm font-medium ${colorTheme === 'dark' ? 'text-gray-200' : colorTheme === 'neon' ? 'text-green-400' : 'text-gray-700'}`}>{title}</span>
+                                    <img src={logo} alt={title} className="w-4 h-4 md:w-5 md:h-5" />
+                                    <span className={`text-xs md:text-sm font-medium ${colorTheme === 'dark' ? 'text-gray-200' : colorTheme === 'neon' ? 'text-green-400' : 'text-gray-700'}`}>{title}</span>
                                 </div>
                             ))}
                         </div>
                         
                         {data._subtitle && (
-                            <p className={`mt-4 text-sm ${style.subtitleColor}`}>{data._subtitle}</p>
+                            <p className={`mt-3 md:mt-4 text-xs md:text-sm ${style.subtitleColor}`}>{data._subtitle}</p>
                         )}
                     </div>
                 </div>
