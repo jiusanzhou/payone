@@ -7,10 +7,15 @@ import { getBasePath } from "../../lib/utils"
 import { showToast } from "../../components/toast"
 
 const PROVIDERS = [
-    { id: 'worker', name: 'Worker', icon: '🖥️', description: 'Satori 渲染' },
-    { id: 'thumio', name: 'Thum.io', icon: '📷', description: '免费' },
-    { id: 'microlink', name: 'Microlink', icon: '🔗', description: '浏览器截图' },
-    { id: 'shotsapi', name: 'ShotsAPI', icon: '📸', description: '第三方' },
+    { id: 'worker', name: 'Worker' },
+    { id: 'thumio', name: 'Thum.io' },
+    { id: 'microlink', name: 'Microlink' },
+    { id: 'shotsapi', name: 'ShotsAPI' },
+]
+
+const THEMES = [
+    { id: 'default', name: '默认', description: '竖版二维码' },
+    { id: 'banner', name: 'Banner', description: '横幅样式' },
 ]
 
 const UsagePage = () => {
@@ -20,6 +25,7 @@ const UsagePage = () => {
     const [basePath, setBasePath] = useState("")
     const [copied, setCopied] = useState(null)
     const [provider, setProvider] = useState('worker')
+    const [theme, setTheme] = useState('default')
     const [imageKey, setImageKey] = useState(0)
     
     useEffect(() => {
@@ -30,12 +36,20 @@ const UsagePage = () => {
     
     const pageUrl = `${basePath}/s/${code}`
     const providerParam = provider !== 'worker' ? `?provider=${provider}` : ''
-    const imageUrl = `${basePath}/s/${code}.png${providerParam}`
-    const bannerUrl = `${basePath}/s/${code}/banner`
-    const bannerImageUrl = `${basePath}/s/${code}-banner.png${providerParam}`
+    
+    const isBanner = theme === 'banner'
+    const currentImageUrl = isBanner 
+        ? `${basePath}/s/${code}-banner.png${providerParam}`
+        : `${basePath}/s/${code}.png${providerParam}`
+    const currentPageUrl = isBanner ? `${basePath}/s/${code}/banner` : pageUrl
 
     const handleProviderChange = (newProvider) => {
         setProvider(newProvider)
+        setImageKey(prev => prev + 1)
+    }
+
+    const handleThemeChange = (newTheme) => {
+        setTheme(newTheme)
         setImageKey(prev => prev + 1)
     }
 
@@ -106,10 +120,10 @@ const UsagePage = () => {
                 </div>
 
                 <div className="bg-white rounded-2xl p-6 shadow-sm ring-1 ring-gray-100">
-                    <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold text-gray-700">二维码图片</h3>
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-semibold text-gray-700">分享图片</h3>
                         <button
-                            onClick={() => copyToClipboard(imageUrl, 'image')}
+                            onClick={() => copyToClipboard(currentImageUrl, 'image')}
                             className={`text-sm px-3 py-1 rounded-full transition-colors ${
                                 copied === 'image' 
                                     ? 'bg-green-100 text-green-600' 
@@ -119,95 +133,74 @@ const UsagePage = () => {
                             {copied === 'image' ? '已复制 ✓' : '复制链接'}
                         </button>
                     </div>
-                    <div className="bg-gray-50 rounded-xl p-4 font-mono text-sm text-gray-600 break-all mb-4">
-                        {imageUrl}
-                    </div>
-                    <div className="relative p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
-                        <div className="absolute top-3 right-3 flex gap-1">
-                            {PROVIDERS.map((p) => (
-                                <button
-                                    key={p.id}
-                                    onClick={() => handleProviderChange(p.id)}
-                                    title={`${p.name} - ${p.description}`}
-                                    className={`px-2 py-1 rounded-lg text-xs transition-all ${
-                                        provider === p.id
-                                            ? 'bg-purple-500 text-white shadow-sm'
-                                            : 'bg-white/80 text-gray-500 hover:bg-white hover:text-purple-600'
-                                    }`}
-                                >
-                                    {p.icon}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="flex justify-center">
-                            <img
-                                key={`qr-${imageKey}`}
-                                className="rounded-xl shadow-lg max-w-[280px]"
-                                alt={`${code} 收款码`}
-                                src={imageUrl}
-                            />
-                        </div>
-                        <div className="text-center mt-3 text-xs text-gray-400">
-                            当前: {PROVIDERS.find(p => p.id === provider)?.name}
-                        </div>
-                    </div>
-                </div>
 
-                <div className="bg-white rounded-2xl p-6 shadow-sm ring-1 ring-gray-100">
-                    <div className="flex items-center justify-between mb-3">
-                        <div>
-                            <h3 className="font-semibold text-gray-700">横幅 Banner</h3>
-                            <p className="text-xs text-gray-400 mt-1">适用于 GitHub README 等场景</p>
+                    <div className="flex gap-4 mb-4">
+                        <div className="flex-1">
+                            <label className="text-xs text-gray-500 mb-2 block">样式</label>
+                            <div className="flex gap-2">
+                                {THEMES.map((t) => (
+                                    <button
+                                        key={t.id}
+                                        onClick={() => handleThemeChange(t.id)}
+                                        className={`flex-1 px-3 py-2 rounded-lg text-sm transition-all ${
+                                            theme === t.id
+                                                ? 'bg-purple-500 text-white shadow-sm'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {t.name}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                        <button
-                            onClick={() => copyToClipboard(bannerImageUrl, 'banner')}
-                            className={`text-sm px-3 py-1 rounded-full transition-colors ${
-                                copied === 'banner' 
-                                    ? 'bg-green-100 text-green-600' 
-                                    : 'bg-gray-100 text-gray-600 hover:bg-purple-100 hover:text-purple-600'
-                            }`}
-                        >
-                            {copied === 'banner' ? '已复制 ✓' : '复制链接'}
-                        </button>
+                        <div className="flex-1">
+                            <label className="text-xs text-gray-500 mb-2 block">截图服务</label>
+                            <div className="flex gap-1">
+                                {PROVIDERS.map((p) => (
+                                    <button
+                                        key={p.id}
+                                        onClick={() => handleProviderChange(p.id)}
+                                        className={`flex-1 px-2 py-2 rounded-lg text-xs transition-all ${
+                                            provider === p.id
+                                                ? 'bg-purple-500 text-white shadow-sm'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {p.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
+
                     <div className="bg-gray-50 rounded-xl p-4 font-mono text-sm text-gray-600 break-all mb-4">
-                        {bannerImageUrl}
+                        {currentImageUrl}
                     </div>
-                    <div className="relative p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
-                        <div className="absolute top-3 right-3 flex gap-1">
-                            {PROVIDERS.map((p) => (
-                                <button
-                                    key={p.id}
-                                    onClick={() => handleProviderChange(p.id)}
-                                    title={`${p.name} - ${p.description}`}
-                                    className={`px-2 py-1 rounded-lg text-xs transition-all ${
-                                        provider === p.id
-                                            ? 'bg-purple-500 text-white shadow-sm'
-                                            : 'bg-white/80 text-gray-500 hover:bg-white hover:text-purple-600'
-                                    }`}
-                                >
-                                    {p.icon}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="flex justify-center pt-6">
-                            <img
-                                key={`banner-${imageKey}`}
-                                className="rounded-lg shadow-lg w-full max-w-xl"
-                                alt={`${code} banner`}
-                                src={bannerImageUrl}
-                            />
-                        </div>
+
+                    <div className={`p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl ${isBanner ? '' : 'flex justify-center'}`}>
+                        <img
+                            key={`img-${imageKey}-${theme}`}
+                            className={`rounded-xl shadow-lg ${isBanner ? 'w-full' : 'max-w-[280px]'}`}
+                            alt={`${code} ${theme}`}
+                            src={currentImageUrl}
+                        />
                     </div>
+
+                    {isBanner && (
+                        <p className="text-xs text-gray-400 mt-3 text-center">
+                            适用于 GitHub README 等场景
+                        </p>
+                    )}
+
                     <div className="mt-4 flex gap-3">
                         <Link
-                            href={`/s/${code}/banner`}
+                            href={currentPageUrl.replace(basePath, '')}
                             className="flex-1 py-3 text-center text-purple-600 border border-purple-200 rounded-xl hover:bg-purple-50 transition-colors"
                         >
-                            打开横幅页面
+                            打开{isBanner ? '横幅' : ''}页面
                         </Link>
                         <a
-                            href={`/s/${code}/banner`}
+                            href={currentPageUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-4 py-3 text-gray-400 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
