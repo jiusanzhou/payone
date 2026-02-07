@@ -225,9 +225,9 @@ const UsagePage = () => {
                     </div>
 
                     <div className={`p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl ${isBanner ? '' : 'flex justify-center'}`}>
-                        <div className="relative">
+                        <div className={`relative ${isBanner ? 'w-full' : 'w-[280px]'}`} style={{ aspectRatio: isBanner ? '1200/630' : '640/960' }}>
                             {imageLoading && (
-                                <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl ${isBanner ? '' : 'min-w-[280px] min-h-[420px]'}`}>
+                                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
                                     <div className="flex flex-col items-center gap-3">
                                         <div className="w-8 h-8 border-3 border-purple-200 border-t-purple-500 rounded-full animate-spin"></div>
                                         <span className="text-sm text-gray-400">加载中...</span>
@@ -236,7 +236,7 @@ const UsagePage = () => {
                             )}
                             <img
                                 key={`img-${imageKey}-${layout}-${colorTheme}`}
-                                className={`rounded-xl shadow-lg transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'} ${isBanner ? 'w-full' : 'max-w-[280px]'}`}
+                                className={`w-full h-full object-contain rounded-xl shadow-lg transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                                 alt={`${code} ${layout} ${colorTheme}`}
                                 src={currentImageUrl}
                                 onLoad={() => setImageLoading(false)}
