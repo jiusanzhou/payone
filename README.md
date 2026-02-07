@@ -93,20 +93,21 @@ payone/
 ├── README.md
 ├── channels.json          # 支付渠道配置
 ├── assets/                # 静态资源
-├── web/                   # Next.js 前端应用
-│   ├── components/        # React 组件
+├── web/                   # Next.js 前端应用 (TypeScript)
+│   ├── components/        # React 组件 (.tsx)
 │   ├── config/           # 配置文件
-│   ├── layouts/          # 布局组件
 │   ├── lib/              # 工具库
 │   │   ├── api.ts        # API 调用
+│   │   ├── config.ts     # 环境配置
+│   │   ├── screenshot.ts # 截图服务注册
 │   │   ├── server.ts     # 服务端核心逻辑
-│   │   ├── store.ts      # 存储后端实现
+│   │   ├── store.ts      # 存储后端实现（工厂模式）
 │   │   └── utils.ts      # 工具函数
-│   ├── pages/            # 页面路由
-│   │   ├── editor.jsx    # 编辑器页面
-│   │   ├── s/[code].jsx  # 收款码展示页
+│   ├── pages/            # 页面路由 (.tsx)
+│   │   ├── editor.tsx    # 编辑器页面
+│   │   ├── s/[code].tsx  # 收款码展示页
 │   │   └── usage/        # 使用说明页
-│   └── views/            # 视图组件
+│   └── views/            # 视图组件 (.tsx)
 └── worker/               # Cloudflare Worker
     ├── src/ts/           # TypeScript 源码
     │   ├── index.ts      # Worker 入口
@@ -210,13 +211,15 @@ compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-STORE_TYPE = "cloudflare-kv"  # 存储后端类型
 SCREENSHOT_PROVIDER = "satori"  # 截图服务
+BASE_URL = "https://your-domain.com"  # 你的域名
 
 [[kv_namespaces]]
-binding = "PAYONE_KV"
+binding = "PAYONE_KV"  # 绑定名称必须是 PAYONE_KV
 id = "你的KV命名空间ID"
 ```
+
+> **注意**：`binding` 必须设置为 `PAYONE_KV`，不要在 `[vars]` 中设置 `PAYONE_KV`，否则会覆盖 KV 绑定。
 
 #### 3. 创建 KV 命名空间（如使用 Cloudflare KV）
 
@@ -236,37 +239,42 @@ wrangler deploy
 
 ## 💾 存储后端配置
 
-项目支持多种存储后端，通过 `STORE_TYPE` 环境变量切换：
+项目支持多种存储后端，通过 KV 绑定或 `STORE_TYPE` 环境变量配置。代码会优先检查 `PAYONE_KV` 绑定，如果存在则使用 Cloudflare KV，否则根据 `STORE_TYPE` 选择其他存储后端。
 
 ### Cloudflare KV（推荐）
 
-最稳定可靠的存储方案，需要 Cloudflare Workers 付费计划。
+最稳定可靠的存储方案。
 
 ```toml
 # wrangler.toml
 [vars]
-STORE_TYPE = ""  # 留空，自动使用 KV（当配置了 kv_namespaces 时）
+SCREENSHOT_PROVIDER = "satori"
+BASE_URL = "https://your-domain.com"
 
 [[kv_namespaces]]
-binding = "PAYONE_KV"
+binding = "PAYONE_KV"  # 必须使用此名称
 id = "你的KV命名空间ID"
 ```
 
 **特点：**
 - 读写速度快，全球边缘节点
 - 支持 list/count 操作
-- 需要付费（$5/月起）
+- 需要 Cloudflare Workers 计划
 
 ---
 
 ### is.gd / v.gd（免费）
 
-使用短链接服务存储数据，无需付费。
+使用短链接服务存储数据，无需付费。不配置 KV 绑定时使用。
 
 ```toml
 # wrangler.toml
 [vars]
 STORE_TYPE = "isgd"
+SCREENSHOT_PROVIDER = "satori"
+BASE_URL = "https://your-domain.com"
+
+# 不配置 [[kv_namespaces]]
 ```
 
 **特点：**
@@ -279,13 +287,17 @@ STORE_TYPE = "isgd"
 
 ### TinyURL
 
-使用 TinyURL 短链接服务。
+使用 TinyURL 短链接服务。不配置 KV 绑定时使用。
 
 ```toml
 # wrangler.toml
 [vars]
 STORE_TYPE = "tinyurl"
 TINYURL_API_TOKEN = "你的API令牌"  # 可选，使用官方API时需要
+SCREENSHOT_PROVIDER = "satori"
+BASE_URL = "https://your-domain.com"
+
+# 不配置 [[kv_namespaces]]
 ```
 
 **特点：**
@@ -418,7 +430,7 @@ curl https://your-worker.dev/api/screenshot/mycode-banner.png
 
 ## ⚙️ 完整配置示例
 
-### wrangler.toml
+### wrangler.toml（使用 Cloudflare KV）
 
 ```toml
 name = "payone"
@@ -430,15 +442,35 @@ compatibility_flags = ["nodejs_compat"]
 command = ""
 
 [vars]
-STORE_TYPE = ""  # cloudflare-kv | isgd | tinyurl | gitio
-SCREENSHOT_PROVIDER = "satori"  # satori | microlink | shotsapi
+SCREENSHOT_PROVIDER = "satori"
+BASE_URL = "https://payone.your-domain.com"
 
-# TinyURL API Token（使用 tinyurl 时可选）
-# TINYURL_API_TOKEN = "your-token"
+# 注意：不要在 [vars] 中设置 PAYONE_KV，否则会覆盖下面的 KV 绑定
 
 [[kv_namespaces]]
 binding = "PAYONE_KV"
 id = "你的KV命名空间ID"
+
+[[rules]]
+type = "CompiledWasm"
+globs = ["**/*.wasm"]
+```
+
+### wrangler.toml（使用 is.gd 免费存储）
+
+```toml
+name = "payone"
+main = "src/ts/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = ""
+
+[vars]
+STORE_TYPE = "isgd"
+SCREENSHOT_PROVIDER = "satori"
+BASE_URL = "https://payone.your-domain.com"
 
 [[rules]]
 type = "CompiledWasm"

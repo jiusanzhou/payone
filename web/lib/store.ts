@@ -18,7 +18,7 @@ export interface KVNamespace {
 }
 
 export abstract class Store {
-    name = "base";
+    abstract readonly name: string;
     
     abstract put(key: string, data: PaymentData): Promise<boolean>;
     abstract get(key: string): Promise<PaymentData>;
@@ -26,19 +26,27 @@ export abstract class Store {
     async count(): Promise<number | null> {
         return null;
     }
+
+    static create(options: StoreOptions): Store {
+        throw new Error("Subclass must implement static create method");
+    }
 }
 
 export class GitioStore extends Store {
-    name = "gitio";
+    readonly name = "gitio";
     private _host: string;
     private _basicUrl: string;
     private _keyPrefix: string;
     
-    constructor({ host, basicUrl, keyPrefix }: StoreOptions = {}) {
+    constructor(options: StoreOptions = {}) {
         super();
-        this._host = host || "https://git.io";
-        this._basicUrl = basicUrl || "https://jiusanzhou.github.io/payone/s";
-        this._keyPrefix = keyPrefix || "payone-";
+        this._host = options.host || "https://git.io";
+        this._basicUrl = options.basicUrl || "https://jiusanzhou.github.io/payone/s";
+        this._keyPrefix = options.keyPrefix || "payone-";
+    }
+
+    static create(options: StoreOptions = {}): GitioStore {
+        return new GitioStore(options);
     }
 
     private _buildTargetUrl(data: PaymentData): string {
@@ -81,14 +89,24 @@ export class GitioStore extends Store {
 }
 
 export class CloudflareKVStore extends Store {
-    name = "cloudflare-kv";
+    readonly name = "cloudflare-kv";
     private _kv: KVNamespace;
     private _keyPrefix: string;
     
-    constructor(kvNamespace: KVNamespace, { keyPrefix }: StoreOptions = {}) {
+    constructor(options: StoreOptions) {
         super();
-        this._kv = kvNamespace;
-        this._keyPrefix = keyPrefix || "payone:";
+        if (!options.kvNamespace) {
+            throw new Error("kvNamespace is required for Cloudflare KV store");
+        }
+        if (typeof options.kvNamespace.get !== 'function') {
+            throw new Error("kvNamespace must have a get() method - ensure KV binding is properly configured");
+        }
+        this._kv = options.kvNamespace;
+        this._keyPrefix = options.keyPrefix || "payone:";
+    }
+
+    static create(options: StoreOptions): CloudflareKVStore {
+        return new CloudflareKVStore(options);
     }
 
     private _getKey(key: string): string {
@@ -141,18 +159,20 @@ export class CloudflareKVStore extends Store {
 }
 
 export class IsGdStore extends Store {
-    name = "isgd";
+    readonly name = "isgd";
     private _host: string;
     private _basicUrl: string;
     private _keyPrefix: string;
     
-    constructor({ basicUrl, keyPrefix, host }: StoreOptions = {}) {
+    constructor(options: StoreOptions = {}) {
         super();
-        // v.gd is an alias for is.gd - use it as default since is.gd may be blocked in some regions
-        this._host = host || "https://v.gd";
-        this._basicUrl = basicUrl || "https://payone.wencai.app/s";
-        // v.gd only allows a-z, 0-9, underscore in shortcodes
-        this._keyPrefix = keyPrefix || "payone_";
+        this._host = options.host || "https://v.gd";
+        this._basicUrl = options.basicUrl || "https://payone.wencai.app/s";
+        this._keyPrefix = options.keyPrefix || "payone_";
+    }
+
+    static create(options: StoreOptions = {}): IsGdStore {
+        return new IsGdStore(options);
     }
 
     private _buildTargetUrl(data: PaymentData): string {
@@ -221,18 +241,22 @@ export class IsGdStore extends Store {
 }
 
 export class TinyURLStore extends Store {
-    name = "tinyurl";
+    readonly name = "tinyurl";
     private _host: string;
     private _basicUrl: string;
     private _keyPrefix: string;
     private _apiToken?: string;
     
-    constructor({ basicUrl, keyPrefix, apiToken }: StoreOptions = {}) {
+    constructor(options: StoreOptions = {}) {
         super();
         this._host = "https://tinyurl.com";
-        this._basicUrl = basicUrl || "https://payone.wencai.app/s";
-        this._keyPrefix = keyPrefix || "payone-";
-        this._apiToken = apiToken;
+        this._basicUrl = options.basicUrl || "https://payone.wencai.app/s";
+        this._keyPrefix = options.keyPrefix || "payone-";
+        this._apiToken = options.apiToken;
+    }
+
+    static create(options: StoreOptions = {}): TinyURLStore {
+        return new TinyURLStore(options);
     }
 
     private _buildTargetUrl(data: PaymentData): string {
@@ -324,21 +348,23 @@ export class TinyURLStore extends Store {
 
 export type StoreType = 'cloudflare-kv' | 'tinyurl' | 'is.gd' | 'isgd' | 'git.io' | 'gitio';
 
+interface StoreClass {
+    create(options: StoreOptions): Store;
+}
+
+const storeRegistry: Record<StoreType, StoreClass> = {
+    'cloudflare-kv': CloudflareKVStore,
+    'tinyurl': TinyURLStore,
+    'is.gd': IsGdStore,
+    'isgd': IsGdStore,
+    'git.io': GitioStore,
+    'gitio': GitioStore,
+};
+
 export function createStore(type: StoreType, options: StoreOptions = {}): Store {
-    switch (type) {
-        case 'cloudflare-kv':
-            if (!options.kvNamespace) {
-                throw new Error("kvNamespace is required for Cloudflare KV store");
-            }
-            return new CloudflareKVStore(options.kvNamespace, options);
-        case 'tinyurl':
-            return new TinyURLStore(options);
-        case 'is.gd':
-        case 'isgd':
-            return new IsGdStore(options);
-        case 'git.io':
-        case 'gitio':
-        default:
-            return new GitioStore(options);
+    const StoreConstructor = storeRegistry[type];
+    if (!StoreConstructor) {
+        throw new Error(`Unknown store type: ${type}`);
     }
+    return StoreConstructor.create(options);
 }
