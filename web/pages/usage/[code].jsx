@@ -6,12 +6,21 @@ import Link from "../../components/link"
 import { getBasePath } from "../../lib/utils"
 import { showToast } from "../../components/toast"
 
+const PROVIDERS = [
+    { id: 'worker', name: 'Worker', icon: '🖥️', description: 'Satori 渲染' },
+    { id: 'thumio', name: 'Thum.io', icon: '📷', description: '免费' },
+    { id: 'microlink', name: 'Microlink', icon: '🔗', description: '浏览器截图' },
+    { id: 'shotsapi', name: 'ShotsAPI', icon: '📸', description: '第三方' },
+]
+
 const UsagePage = () => {
     const router = useRouter()
     const { code, isnew } = router.query
 
     const [basePath, setBasePath] = useState("")
     const [copied, setCopied] = useState(null)
+    const [provider, setProvider] = useState('worker')
+    const [imageKey, setImageKey] = useState(0)
     
     useEffect(() => {
         setBasePath(getBasePath())
@@ -20,9 +29,15 @@ const UsagePage = () => {
     const { width, height } = useWindowSize()
     
     const pageUrl = `${basePath}/s/${code}`
-    const imageUrl = `${basePath}/s/${code}.png`
+    const providerParam = provider !== 'worker' ? `?provider=${provider}` : ''
+    const imageUrl = `${basePath}/s/${code}.png${providerParam}`
     const bannerUrl = `${basePath}/s/${code}/banner`
-    const bannerImageUrl = `${basePath}/s/${code}-banner.png`
+    const bannerImageUrl = `${basePath}/s/${code}-banner.png${providerParam}`
+
+    const handleProviderChange = (newProvider) => {
+        setProvider(newProvider)
+        setImageKey(prev => prev + 1)
+    }
 
     const copyToClipboard = (text, type) => {
         navigator.clipboard.writeText(text).then(() => {
@@ -107,12 +122,34 @@ const UsagePage = () => {
                     <div className="bg-gray-50 rounded-xl p-4 font-mono text-sm text-gray-600 break-all mb-4">
                         {imageUrl}
                     </div>
-                    <div className="flex justify-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
-                        <img
-                            className="rounded-xl shadow-lg max-w-[280px]"
-                            alt={`${code} 收款码`}
-                            src={imageUrl}
-                        />
+                    <div className="relative p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
+                        <div className="absolute top-3 right-3 flex gap-1">
+                            {PROVIDERS.map((p) => (
+                                <button
+                                    key={p.id}
+                                    onClick={() => handleProviderChange(p.id)}
+                                    title={`${p.name} - ${p.description}`}
+                                    className={`px-2 py-1 rounded-lg text-xs transition-all ${
+                                        provider === p.id
+                                            ? 'bg-purple-500 text-white shadow-sm'
+                                            : 'bg-white/80 text-gray-500 hover:bg-white hover:text-purple-600'
+                                    }`}
+                                >
+                                    {p.icon}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex justify-center">
+                            <img
+                                key={`qr-${imageKey}`}
+                                className="rounded-xl shadow-lg max-w-[280px]"
+                                alt={`${code} 收款码`}
+                                src={imageUrl}
+                            />
+                        </div>
+                        <div className="text-center mt-3 text-xs text-gray-400">
+                            当前: {PROVIDERS.find(p => p.id === provider)?.name}
+                        </div>
                     </div>
                 </div>
 
@@ -136,12 +173,31 @@ const UsagePage = () => {
                     <div className="bg-gray-50 rounded-xl p-4 font-mono text-sm text-gray-600 break-all mb-4">
                         {bannerImageUrl}
                     </div>
-                    <div className="flex justify-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
-                        <img
-                            className="rounded-lg shadow-lg w-full max-w-xl"
-                            alt={`${code} banner`}
-                            src={bannerImageUrl}
-                        />
+                    <div className="relative p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
+                        <div className="absolute top-3 right-3 flex gap-1">
+                            {PROVIDERS.map((p) => (
+                                <button
+                                    key={p.id}
+                                    onClick={() => handleProviderChange(p.id)}
+                                    title={`${p.name} - ${p.description}`}
+                                    className={`px-2 py-1 rounded-lg text-xs transition-all ${
+                                        provider === p.id
+                                            ? 'bg-purple-500 text-white shadow-sm'
+                                            : 'bg-white/80 text-gray-500 hover:bg-white hover:text-purple-600'
+                                    }`}
+                                >
+                                    {p.icon}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex justify-center pt-6">
+                            <img
+                                key={`banner-${imageKey}`}
+                                className="rounded-lg shadow-lg w-full max-w-xl"
+                                alt={`${code} banner`}
+                                src={bannerImageUrl}
+                            />
+                        </div>
                     </div>
                     <div className="mt-4 flex gap-3">
                         <Link

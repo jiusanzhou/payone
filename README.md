@@ -171,14 +171,14 @@ npm run start
 
 | 变量名 | 说明 | 默认值 | 示例 |
 |--------|------|--------|------|
-| `WORKER_API_URL` | Worker API 地址 | - | `https://your-worker.workers.dev` |
-| `USE_WORKER_SCREENSHOT` | 是否使用 Worker 生成截图 | `false` | `true` |
+| `WORKER_API_URL` | Worker API 地址 | `http://localhost:8787` | `https://your-worker.workers.dev` |
+| `SCREENSHOT_PROVIDER` | 截图服务提供者 | `worker` | `worker` / `microlink` / `shotsapi` |
 
 在 `web/.env.local` 中配置：
 
 ```env
 WORKER_API_URL=https://your-worker.workers.dev
-USE_WORKER_SCREENSHOT=true
+SCREENSHOT_PROVIDER=worker
 ```
 
 ---
@@ -309,13 +309,12 @@ STORE_TYPE = "gitio"
 
 项目支持为收款码生成分享图片，通过 `SCREENSHOT_PROVIDER` 配置：
 
-### Satori（推荐，默认）
+### Worker / Satori（推荐，默认）
 
 使用 Satori + Resvg 在 Worker 内直接渲染，无外部依赖。
 
-```toml
-[vars]
-SCREENSHOT_PROVIDER = "satori"
+```env
+SCREENSHOT_PROVIDER=worker
 ```
 
 **特点：**
@@ -325,13 +324,27 @@ SCREENSHOT_PROVIDER = "satori"
 
 ---
 
+### Thum.io（免费）
+
+完全免费的截图服务，无需注册。
+
+```env
+SCREENSHOT_PROVIDER=thumio
+```
+
+**特点：**
+- 完全免费，无限制
+- 无需 API Key
+- 支持自定义尺寸
+
+---
+
 ### Microlink
 
 使用 Microlink 截图服务。
 
-```toml
-[vars]
-SCREENSHOT_PROVIDER = "microlink"
+```env
+SCREENSHOT_PROVIDER=microlink
 ```
 
 **特点：**
@@ -345,14 +358,29 @@ SCREENSHOT_PROVIDER = "microlink"
 
 使用 screenshotapi.net 服务。
 
-```toml
-[vars]
-SCREENSHOT_PROVIDER = "shotsapi"
+```env
+SCREENSHOT_PROVIDER=shotsapi
 ```
 
 **特点：**
 - 高质量截图
 - 需要 API 密钥（付费）
+
+---
+
+### ApiFlash
+
+使用 ApiFlash 截图服务（100次/月免费）。
+
+```env
+SCREENSHOT_PROVIDER=apiflash
+APIFLASH_ACCESS_KEY=your_access_key
+```
+
+**特点：**
+- 100次/月免费额度
+- 需要注册获取 API Key
+- 高质量 Chrome 渲染
 
 
 ## 🖼️ 截图 API 使用
@@ -423,8 +451,8 @@ globs = ["**/*.wasm"]
 # Worker API 地址
 WORKER_API_URL=https://payone.your-domain.workers.dev
 
-# 是否使用 Worker 截图服务
-USE_WORKER_SCREENSHOT=true
+# 截图服务提供者: worker | microlink | shotsapi
+SCREENSHOT_PROVIDER=worker
 ```
 
 
