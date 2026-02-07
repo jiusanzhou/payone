@@ -2,7 +2,7 @@ import Server from "../../../web/lib/server";
 import { CloudflareKVStore, IsGdStore, TinyURLStore, KVNamespace, PaymentData } from "../../../web/lib/store";
 import { Router } from "cloudworker-router";
 import { getProvider, getDefaultProvider } from "./screenshot";
-import type { ScreenshotData, PaymentChannelData } from "./screenshot";
+import type { ScreenshotData, PaymentChannelData, LayoutType, ColorTheme } from "./screenshot";
 import channels from "../../../channels.json";
 
 interface Env {
@@ -140,9 +140,11 @@ router.get('/api/screenshot/:code', async (ctx) => {
 
     const cleanCode = code.replace(/\.(png|jpg|jpeg|svg)$/, '').replace(/-banner$/, '');
     const isBanner = code.includes('-banner') || urlObj.searchParams.get('banner') === 'true';
-    const width = parseInt(urlObj.searchParams.get('width') || (isBanner ? '1200' : '640'));
-    const height = parseInt(urlObj.searchParams.get('height') || (isBanner ? '630' : '960'));
+    const layout = (urlObj.searchParams.get('layout') || (isBanner ? 'banner' : 'default')) as LayoutType;
+    const width = parseInt(urlObj.searchParams.get('width') || (layout === 'banner' ? '1200' : '640'));
+    const height = parseInt(urlObj.searchParams.get('height') || (layout === 'banner' ? '630' : '960'));
     const format = (urlObj.searchParams.get('format') || 'png') as 'png' | 'svg';
+    const theme = (urlObj.searchParams.get('theme') || 'default') as ColorTheme;
 
     const [, , channelsData, err] = await server.getItem(cleanCode, '');
 
@@ -170,14 +172,14 @@ router.get('/api/screenshot/:code', async (ctx) => {
         excerpt: channelsData?._excerpt,
         channels: activeChannels,
         pageUrl: `https://payone.wencai.app/s/${cleanCode}`,
-        isBanner,
+        isBanner: layout === 'banner',
     };
 
     const providerName = ctx.env.SCREENSHOT_PROVIDER || 'satori';
     const provider = providerName === 'satori' ? getDefaultProvider() : getProvider(providerName);
 
     try {
-        const result = await provider.render(screenshotData, { width, height, type: format });
+        const result = await provider.render(screenshotData, { width, height, type: format, layout, theme });
         return new Response(result.data as ArrayBuffer, {
             status: 200,
             headers: {

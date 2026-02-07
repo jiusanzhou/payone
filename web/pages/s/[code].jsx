@@ -12,16 +12,146 @@ import { getChannelByUA, getChannelByName, getCodeUrl, getBasePath } from '../..
 
 const _emptyObject = {};
 
+const THEME_STYLES = {
+    default: {
+        bg: 'bg-purple-400',
+        text: 'text-white',
+        qrBg: 'bg-white/95',
+    },
+    minimal: {
+        bg: 'bg-gray-100',
+        text: 'text-gray-800',
+        qrBg: 'bg-white',
+        border: 'border border-gray-200',
+    },
+    gradient: {
+        bg: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400',
+        text: 'text-white',
+        qrBg: 'bg-white/95',
+    },
+    dark: {
+        bg: 'bg-gray-900',
+        text: 'text-white',
+        qrBg: 'bg-white',
+    },
+    neon: {
+        bg: 'bg-black',
+        text: 'text-green-400',
+        qrBg: 'bg-white',
+        border: 'border-2 border-green-400',
+        shadow: 'shadow-[0_0_20px_rgba(0,255,136,0.3)]',
+    },
+}
+
+const BANNER_THEME_STYLES = {
+    default: {
+        containerBg: 'bg-gradient-to-br from-white via-purple-50 to-pink-50',
+        cardBg: 'bg-white/95',
+        titleColor: 'text-gray-800',
+        textColor: 'text-gray-500',
+        subtitleColor: 'text-gray-400',
+    },
+    minimal: {
+        containerBg: 'bg-gray-50',
+        cardBg: 'bg-white',
+        titleColor: 'text-gray-800',
+        textColor: 'text-gray-500',
+        subtitleColor: 'text-gray-400',
+        border: 'border border-gray-200',
+    },
+    gradient: {
+        containerBg: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400',
+        cardBg: 'bg-white/95',
+        titleColor: 'text-gray-800',
+        textColor: 'text-gray-600',
+        subtitleColor: 'text-gray-400',
+    },
+    dark: {
+        containerBg: 'bg-gray-900',
+        cardBg: 'bg-gray-800',
+        titleColor: 'text-white',
+        textColor: 'text-gray-300',
+        subtitleColor: 'text-gray-500',
+    },
+    neon: {
+        containerBg: 'bg-black',
+        cardBg: 'bg-black',
+        titleColor: 'text-green-400',
+        textColor: 'text-gray-400',
+        subtitleColor: 'text-green-400/70',
+        border: 'border border-green-400/50',
+        shadow: 'shadow-[0_0_30px_rgba(0,255,136,0.2)]',
+    },
+}
+
+const BannerLayout = ({ data, qrcode, activeChannels, colorTheme = 'default' }) => {
+    const style = BANNER_THEME_STYLES[colorTheme] || BANNER_THEME_STYLES.default
+    
+    return (
+        <div className={`flex-1 flex items-center justify-center p-8 min-h-screen ${style.containerBg}`}>
+            <Head>
+                <title>{data._title || '支持我们'} | PayOne</title>
+            </Head>
+            <div className={`backdrop-blur rounded-3xl shadow-2xl p-8 md:p-10 max-w-3xl w-full ${style.cardBg} ${style.border || ''} ${style.shadow || ''}`}>
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                    <div className="flex-shrink-0">
+                        <div className="bg-white rounded-2xl p-3 shadow-lg ring-1 ring-gray-100">
+                            {qrcode && (
+                                <img 
+                                    src={qrcode} 
+                                    alt="收款二维码"
+                                    className="w-40 h-40 md:w-48 md:h-48"
+                                />
+                            )}
+                        </div>
+                    </div>
+                    
+                    <div className="flex-1 text-center md:text-left">
+                        <h1 className={`text-2xl md:text-3xl font-bold mb-2 ${style.titleColor}`}>
+                            {data._title || '支持我们'}
+                        </h1>
+                        {data._excerpt && (
+                            <p className={`mb-4 ${style.textColor}`}>{data._excerpt}</p>
+                        )}
+                        
+                        <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
+                            {activeChannels.map(({ name, title, logo, color }) => (
+                                <div 
+                                    key={name}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-full"
+                                    style={{ backgroundColor: colorTheme === 'dark' || colorTheme === 'neon' ? `${color}30` : `${color}20` }}
+                                >
+                                    <img src={logo} alt={title} className="w-5 h-5" />
+                                    <span className={`text-sm font-medium ${colorTheme === 'dark' ? 'text-gray-200' : colorTheme === 'neon' ? 'text-green-400' : 'text-gray-700'}`}>{title}</span>
+                                </div>
+                            ))}
+                        </div>
+                        
+                        {data._subtitle && (
+                            <p className={`mt-4 text-sm ${style.subtitleColor}`}>{data._subtitle}</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 // landing page for qrcode
 const CodePage = ({ isPreview, type, sectionProps={}, className="", onQrcode, xdata=_emptyObject, ...props }) => {
     const router = useRouter()
-    const { code, _type, ...args } = router.query
+    const { code, _type, layout, theme, ...args } = router.query
 
     let [waiting, setWaiting] = useState(true)
     let [channel, setChannel] = useState(null)
     let [qrcode, setQrcode] = useState(null)
     let [data, setData] = useState(_emptyObject)
     let [isExits, setIsExits] = useState(true)
+
+    const currentLayout = layout || 'default'
+    const currentTheme = theme || 'default'
+    const isBanner = currentLayout === 'banner'
+    const themeStyle = THEME_STYLES[currentTheme] || THEME_STYLES.default
 
     useEffect(() => {
         // get ua from _type
@@ -35,36 +165,38 @@ const CodePage = ({ isPreview, type, sectionProps={}, className="", onQrcode, xd
         const loadData = async () => {
             if (!router.isReady) return;
 
-            let channels = {}
+            let channelsData = {}
 
             if (code) {
                 const item = await apis.getItem(code);
-                channels = item.channels || {};
+                channelsData = item.channels || {};
             }
 
-            const data = {...xdata, ...channels, ...args}
+            const mergedData = {...xdata, ...channelsData, ...args}
 
-            setData(data)
+            setData(mergedData)
 
-            if (!isPreview && channel && data[channel.name] && channel.config.redirect) {
-                location.href = channel.gen({ code: data[channel.name] })
+            if (!isPreview && !isBanner && channel && mergedData[channel.name] && channel.config.redirect) {
+                location.href = channel.gen({ code: mergedData[channel.name] })
             }
 
-            setIsExits(Object.keys(data).filter(key => !key.startsWith("_") && data[key]).length !== 0);
+            setIsExits(Object.keys(mergedData).filter(key => !key.startsWith("_") && mergedData[key]).length !== 0);
 
-            const url = channel&&data[channel.name] ?
-                channel.gen({ code: data[channel.name] }) :
+            const url = channel&&mergedData[channel.name] ?
+                channel.gen({ code: mergedData[channel.name] }) :
                 code ? location.href :
                 getBasePath() + "/s?" + Object.keys(xdata).map((k) => `${k}=${encodeURIComponent(xdata[k])}`).join('&');
 
             onQrcode && onQrcode(url);
-            QRCode.toDataURL(url).then((r) => {
+            QRCode.toDataURL(url, { width: 256, margin: 2 }).then((r) => {
                 setQrcode(r)
                 setWaiting(false)
             })
         }
         loadData()
-    }, [code, xdata, router.isReady])
+    }, [code, xdata, router.isReady, isBanner])
+
+    const activeChannels = channels.filter(c => !c.disable && data[c.name])
 
     if (waiting) return <Section className="justify-center" {...sectionProps}>
         <span className="flex h-10 w-10 relative">
@@ -96,6 +228,10 @@ const CodePage = ({ isPreview, type, sectionProps={}, className="", onQrcode, xd
         </Section>
     )
 
+    if (isBanner) {
+        return <BannerLayout data={data} qrcode={qrcode} activeChannels={activeChannels} colorTheme={currentTheme} />
+    }
+
     return <Section className={`justify-center select-none ${className}`} {...sectionProps}
         description={(!channel||data[channel.name])?data._excerpt:"仅支持以上付款方式 ☝️"}
         title={<div className="flex text-xl space-x-4">
@@ -108,15 +244,15 @@ const CodePage = ({ isPreview, type, sectionProps={}, className="", onQrcode, xd
             </div>)}
         </div>}>
         <div style={{backgroundColor: channel&&channel.config.color}}
-            className="flex flex-col items-center w-full max-w-xs p-6 bg-purple-400 text-white rounded-2xl backdrop-blur-xl bg-opacity-80 shadow-xl">
+            className={`flex flex-col items-center w-full max-w-xs p-6 ${themeStyle.bg} ${themeStyle.text} rounded-2xl backdrop-blur-xl bg-opacity-80 shadow-xl ${themeStyle.border || ''} ${themeStyle.shadow || ''}`}>
             {/* subtitle */}
             <p className="font-bold text-xl must-line-height">{data._subtitle||''}</p>
             {/* qrcode */}
-            <div className="w-2/3 max-w-60 max-h-60 bg-white/95 backdrop-blur-sm my-5 md:my-8 rounded-xl p-3 shadow-lg">
+            <div className={`w-2/3 max-w-60 max-h-60 ${themeStyle.qrBg} backdrop-blur-sm my-5 md:my-8 rounded-xl p-3 shadow-lg`}>
                 <img className="w-full h-full rounded-lg" src={qrcode} alt="QR Code" />
             </div>
             {/* footer */}
-            <p className="w-48 must-line-height text-white/90">{(channel?
+            <p className={`w-48 must-line-height ${themeStyle.text === 'text-white' ? 'text-white/90' : ''}`}>{(channel?
                 data[channel.name]?
                     data._tip||channel.config.tip:
                     `暂不支持「${channel.config.title}」付款`:

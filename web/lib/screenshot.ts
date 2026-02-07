@@ -1,3 +1,6 @@
+export type LayoutType = 'default' | 'banner'
+export type ColorTheme = 'default' | 'minimal' | 'gradient' | 'dark' | 'neon'
+
 export interface ScreenshotOptions {
     width?: number
     height?: number
@@ -5,6 +8,8 @@ export interface ScreenshotOptions {
     type?: string
     device?: string
     isMobile?: boolean
+    layout?: LayoutType
+    theme?: ColorTheme
     [key: string]: string | number | boolean | undefined
 }
 
@@ -18,7 +23,7 @@ export interface ScreenshotResult {
 export interface ScreenshotContext {
     code: string
     host: string
-    isBanner: boolean
+    layout: LayoutType
     app?: string
 }
 
@@ -106,16 +111,25 @@ export class ExternalProvider implements ScreenshotProvider {
         return result
     }
 
-    protected buildPageUrl(ctx: ScreenshotContext): string {
+    protected buildPageUrl(ctx: ScreenshotContext, options: ScreenshotOptions): string {
         let host = ctx.host
         if (/localhost|127.0.0.1/.test(host)) {
             host = 'payone.wencai.app'
         }
 
-        if (ctx.isBanner) {
-            return `https://${host}/s/${ctx.code}/banner`
+        const params: string[] = []
+        if (ctx.layout === 'banner') {
+            params.push('layout=banner')
         }
-        return `https://${host}/s/${ctx.code}${ctx.app ? `?type=${ctx.app}` : ''}`
+        if (options.theme && options.theme !== 'default') {
+            params.push(`theme=${options.theme}`)
+        }
+        if (ctx.app) {
+            params.push(`type=${ctx.app}`)
+        }
+        
+        const queryString = params.length > 0 ? `?${params.join('&')}` : ''
+        return `https://${host}/s/${ctx.code}${queryString}`
     }
 
     async generate(ctx: ScreenshotContext, options: ScreenshotOptions): Promise<ScreenshotResult> {
@@ -124,7 +138,7 @@ export class ExternalProvider implements ScreenshotProvider {
         }
 
         const opts = this.transformOptions(options)
-        opts[this.targetUrlKey] = this.buildPageUrl(ctx)
+        opts[this.targetUrlKey] = this.buildPageUrl(ctx, options)
 
         const query = Object.entries(opts)
             .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
@@ -147,9 +161,10 @@ export class WorkerProvider implements ScreenshotProvider {
 
     async generate(ctx: ScreenshotContext, options: ScreenshotOptions): Promise<ScreenshotResult> {
         const workerUrl = new URL(`${this.apiUrl}/api/screenshot/${ctx.code}`)
+        const isBanner = ctx.layout === 'banner'
         
-        if (ctx.isBanner) {
-            workerUrl.searchParams.set('banner', 'true')
+        if (isBanner) {
+            workerUrl.searchParams.set('layout', 'banner')
             workerUrl.searchParams.set('width', String(options.width || 1200))
             workerUrl.searchParams.set('height', String(options.height || 630))
         } else {
@@ -159,6 +174,10 @@ export class WorkerProvider implements ScreenshotProvider {
 
         if (options.ext) {
             workerUrl.searchParams.set('format', options.ext)
+        }
+
+        if (options.theme && options.theme !== 'default') {
+            workerUrl.searchParams.set('theme', options.theme)
         }
 
         return {
@@ -171,22 +190,32 @@ export class WorkerProvider implements ScreenshotProvider {
 export class ThumioProvider implements ScreenshotProvider {
     readonly name = 'thumio'
 
-    protected buildPageUrl(ctx: ScreenshotContext): string {
+    protected buildPageUrl(ctx: ScreenshotContext, options: ScreenshotOptions): string {
         let host = ctx.host
         if (/localhost|127.0.0.1/.test(host)) {
             host = 'payone.wencai.app'
         }
 
-        if (ctx.isBanner) {
-            return `https://${host}/s/${ctx.code}/banner`
+        const params: string[] = []
+        if (ctx.layout === 'banner') {
+            params.push('layout=banner')
         }
-        return `https://${host}/s/${ctx.code}${ctx.app ? `?type=${ctx.app}` : ''}`
+        if (options.theme && options.theme !== 'default') {
+            params.push(`theme=${options.theme}`)
+        }
+        if (ctx.app) {
+            params.push(`type=${ctx.app}`)
+        }
+        
+        const queryString = params.length > 0 ? `?${params.join('&')}` : ''
+        return `https://${host}/s/${ctx.code}${queryString}`
     }
 
     async generate(ctx: ScreenshotContext, options: ScreenshotOptions): Promise<ScreenshotResult> {
-        const pageUrl = this.buildPageUrl(ctx)
-        const width = options.width || (ctx.isBanner ? 1200 : 640)
-        const crop = options.height || (ctx.isBanner ? 630 : 960)
+        const pageUrl = this.buildPageUrl(ctx, options)
+        const isBanner = ctx.layout === 'banner'
+        const width = options.width || (isBanner ? 1200 : 640)
+        const crop = options.height || (isBanner ? 630 : 960)
         
         const url = `https://image.thum.io/get/width/${width}/crop/${crop}/png/noanimate/${encodeURIComponent(pageUrl)}`
 
@@ -205,16 +234,25 @@ export class ApiFlashProvider implements ScreenshotProvider {
         this.accessKey = accessKey || ''
     }
 
-    protected buildPageUrl(ctx: ScreenshotContext): string {
+    protected buildPageUrl(ctx: ScreenshotContext, options: ScreenshotOptions): string {
         let host = ctx.host
         if (/localhost|127.0.0.1/.test(host)) {
             host = 'payone.wencai.app'
         }
 
-        if (ctx.isBanner) {
-            return `https://${host}/s/${ctx.code}/banner`
+        const params: string[] = []
+        if (ctx.layout === 'banner') {
+            params.push('layout=banner')
         }
-        return `https://${host}/s/${ctx.code}${ctx.app ? `?type=${ctx.app}` : ''}`
+        if (options.theme && options.theme !== 'default') {
+            params.push(`theme=${options.theme}`)
+        }
+        if (ctx.app) {
+            params.push(`type=${ctx.app}`)
+        }
+        
+        const queryString = params.length > 0 ? `?${params.join('&')}` : ''
+        return `https://${host}/s/${ctx.code}${queryString}`
     }
 
     async generate(ctx: ScreenshotContext, options: ScreenshotOptions): Promise<ScreenshotResult> {
@@ -222,9 +260,10 @@ export class ApiFlashProvider implements ScreenshotProvider {
             throw new Error('ApiFlash requires an access key (APIFLASH_ACCESS_KEY)')
         }
 
-        const pageUrl = this.buildPageUrl(ctx)
-        const width = options.width || (ctx.isBanner ? 1200 : 640)
-        const height = options.height || (ctx.isBanner ? 630 : 960)
+        const pageUrl = this.buildPageUrl(ctx, options)
+        const isBanner = ctx.layout === 'banner'
+        const width = options.width || (isBanner ? 1200 : 640)
+        const height = options.height || (isBanner ? 630 : 960)
         
         const params = new URLSearchParams({
             access_key: this.accessKey,

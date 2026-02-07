@@ -3,7 +3,12 @@ export interface ScreenshotOptions {
     height: number
     type?: 'png' | 'jpeg' | 'svg'
     quality?: number
+    layout?: LayoutType
+    theme?: ColorTheme
 }
+
+export type LayoutType = 'default' | 'banner'
+export type ColorTheme = 'default' | 'minimal' | 'gradient' | 'dark' | 'neon'
 
 export interface ScreenshotResult {
     data: ArrayBuffer | string

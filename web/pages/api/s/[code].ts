@@ -1,4 +1,4 @@
-import { getProvider, ScreenshotContext, ScreenshotOptions } from "../../../lib/screenshot"
+import { getProvider, ScreenshotContext, ScreenshotOptions, LayoutType, ColorTheme } from "../../../lib/screenshot"
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 const WORKER_API = process.env.WORKER_API_URL || 'http://localhost:8787'
@@ -6,7 +6,8 @@ const WORKER_API = process.env.WORKER_API_URL || 'http://localhost:8787'
 async function handleScreenshot(
     req: NextApiRequest,
     res: NextApiResponse,
-    isBanner: boolean
+    layout: LayoutType,
+    theme?: string
 ): Promise<void> {
     const { code, app, provider: providerName, ...args } = req.query as Record<string, string>
     const parts = code.split('.')
@@ -16,11 +17,12 @@ async function handleScreenshot(
         ext = parts.pop()
     }
     const cleanCode = parts.join('.')
+    const isBanner = layout === 'banner'
 
     const ctx: ScreenshotContext = {
         code: cleanCode,
         host: req.headers.host || 'payone.wencai.app',
-        isBanner,
+        layout,
         app,
     }
 
@@ -31,6 +33,8 @@ async function handleScreenshot(
         height: isBanner ? 630 : 960,
         type: 'image',
         device: isBanner ? undefined : 'iphone',
+        layout,
+        theme: (theme || 'default') as ColorTheme,
     }
 
     if (args.width) options.width = parseInt(args.width)
@@ -54,15 +58,16 @@ async function handleScreenshot(
 }
 
 async function handleGet(req: NextApiRequest, res: NextApiResponse): Promise<void> {
-    const { code, type } = req.query as { code: string; type?: string }
+    const { code, type, layout, theme } = req.query as { code: string; type?: string; layout?: string; theme?: string }
     
-    const isBanner = code.includes('-banner.') || code.endsWith('-banner')
+    const isBanner = code.includes('-banner.') || code.endsWith('-banner') || layout === 'banner'
     const isImage = code.indexOf('.') !== -1 || type === 'image'
+    const currentLayout: LayoutType = isBanner ? 'banner' : 'default'
 
     if (isImage) {
         const actualCode = code.replace('-banner', '').split('.')[0]
         req.query.code = isBanner ? `${actualCode}.png` : code
-        await handleScreenshot(req, res, isBanner)
+        await handleScreenshot(req, res, currentLayout, theme)
         return
     }
 
