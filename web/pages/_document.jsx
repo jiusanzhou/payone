@@ -23,6 +23,9 @@ export default class MyDocument extends Document {
           `,
             }}
           />}
+
+          <script src="https://cdn.jsdelivr.net/npm/@zumer/snapdom/dist/snapdom.min.js"></script>
+
         </Head>
         <body>
           <Main />

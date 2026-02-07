@@ -1,8 +1,12 @@
+'use client'
+
 import Code from "../pages/s/[code]";
 import channels from "../../channels.json";
 import { useEffect, useState } from "react";
+import Footer from "../components/footer";
+// import snapdom from "@zumer/snapdom";
 
-const Preview = ({className, ...props}) => {
+const Preview = ({className, code, ...props}) => {
     let [curApp, setCurApp] = useState(null)
     // let [ua, setUA] = useState(null)
     let [qrcodeUrl, setQrcodeUrl] = useState(null)
@@ -14,6 +18,7 @@ const Preview = ({className, ...props}) => {
 
     // iphone frame, and user-agent change
     return <div className={`${className} flex flex-col md:flex-col-reverse`}>
+
         <div className="select-none mb-5 mt-0 md:mb-0 md:mt-5">
             <p className="text-md text-gray-500 text-left mb-4">选择预览应用:</p>
             {/* app selector */}
@@ -25,7 +30,7 @@ const Preview = ({className, ...props}) => {
                     key={name}
                     onClick={() => setCurApp(name===curApp?null:name)}>
                     {name===curApp&&<span className="absolute -top-1.5 -right-1.5 inline-flex rounded-full h-3 w-3 bg-purple-500"></span>}
-                    {logo?<img className="h-10" src={logo} />:
+                    {logo?<img className="h-10" src={logo} alt={title} />:
                     <div className="flex items-center backdrop-opacity-30 w-full h-full text-sm">
                         <span>{title}</span>
                     </div>}
@@ -36,12 +41,22 @@ const Preview = ({className, ...props}) => {
         {/* border-1 shadow */}
         <div className={`ring-4 ring-gray-100 ring-opacity-50 rounded-xl overflow-hidden`}>
             <div className="flex justify-between items-center p-4 bg-gray-100 font-bold">
-                <span className="font-md select-none cursor-pointer">✕</span>
+                {/* <span className="font-md select-none cursor-pointer">✕</span> */}
+                <span onClick={() => {
+                    // use snapdom to download the qrcode with frame
+                    const target = document.getElementById('code-frame')
+                    snapdom.download(target, {filename: `${code}-qrcode.png`})
+                }} className="font-md select-none cursor-pointer">↓</span>
                 <span>{props._title||"付款码"}</span>
                 <span onClick={() => qrcodeUrl && open(qrcodeUrl)} className="font-md select-none cursor-pointer">…</span>
             </div>
-            <Code isPreview onQrcode={(v) => setQrcodeUrl(v)} type={curApp} xdata={props}
-                sectionProps={{full: true}}  className="md:my-5 md:py-5 px-5 md:px-5" />
+            <div id='code-frame'>
+                <Code isPreview onQrcode={(v) => setQrcodeUrl(v)} type={curApp} xdata={props}
+                    sectionProps={{full: true}}  className="md:my-0 md:py-5 px-5 md:px-5" />
+
+                {/* add the footer */}
+                <Footer powered />
+            </div>
         </div>
     </div>
 }
