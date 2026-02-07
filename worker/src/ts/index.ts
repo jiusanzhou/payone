@@ -1,5 +1,5 @@
 import Server from "../../../web/lib/server";
-import { CloudflareKVStore, IsGdStore, TinyURLStore, KVNamespace, PaymentData } from "../../../web/lib/store";
+import { createStore, KVNamespace, PaymentData, StoreType } from "../../../web/lib/store";
 import { Router } from "cloudworker-router";
 import { getProvider, getDefaultProvider } from "./screenshot";
 import type { ScreenshotData, PaymentChannelData, LayoutType, ColorTheme } from "./screenshot";
@@ -24,15 +24,16 @@ function getServer(env: Env): Server {
     cachedBaseUrl = baseUrl;
     svr = new Server({ basicUrl: `${baseUrl}/s/` });
     
-    if (env && env.PAYONE_KV) {
-        svr.setStore(new CloudflareKVStore(env.PAYONE_KV));
-    } else if (env && env.STORE_TYPE === 'tinyurl') {
-        svr.setStore(new TinyURLStore({ 
-            basicUrl: `${baseUrl}/s`,
-            apiToken: env.TINYURL_API_TOKEN 
-        }));
-    } else if (env && env.STORE_TYPE === 'isgd') {
-        svr.setStore(new IsGdStore({ basicUrl: `${baseUrl}/s` }));
+    const storeOptions = {
+        basicUrl: `${baseUrl}/s`,
+        kvNamespace: env.PAYONE_KV,
+        apiToken: env.TINYURL_API_TOKEN,
+    };
+
+    if (env.PAYONE_KV) {
+        svr.setStore(createStore('cloudflare-kv', storeOptions));
+    } else if (env.STORE_TYPE) {
+        svr.setStore(createStore(env.STORE_TYPE as StoreType, storeOptions));
     }
     
     return svr;

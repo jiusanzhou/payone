@@ -196,6 +196,7 @@ const CodePage: CodePageComponent = ({ isPreview, type, sectionProps = {}, class
     const [qrcode, setQrcode] = useState<string | null>(null)
     const [data, setData] = useState<PaymentData>(_emptyObject)
     const [isExits, setIsExits] = useState(true)
+    const [loaded, setLoaded] = useState(false)
 
     const currentLayout = layout || 'default'
     const currentTheme = theme || 'default'
@@ -208,6 +209,8 @@ const CodePage: CodePageComponent = ({ isPreview, type, sectionProps = {}, class
     }, [type, _type])
 
     useEffect(() => {
+        if (loaded) return
+
         const loadData = async () => {
             if (!router.isReady) return
 
@@ -243,10 +246,11 @@ const CodePage: CodePageComponent = ({ isPreview, type, sectionProps = {}, class
             QRCode.toDataURL(url, { width: 256, margin: 2 }).then((r) => {
                 setQrcode(r)
                 setWaiting(false)
+                setLoaded(true)
             })
         }
         loadData()
-    }, [code, xdata, router.isReady, isBanner, channel, isPreview, onQrcode, args])
+    }, [code, xdata, router.isReady, isBanner, channel, isPreview, onQrcode, loaded])
 
     const activeChannels = (channels as ChannelConfig[]).filter((c) => !c.disable && data[c.name])
 
