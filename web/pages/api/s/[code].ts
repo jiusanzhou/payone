@@ -1,7 +1,8 @@
 import { getProvider, ScreenshotContext, ScreenshotOptions, LayoutType, ColorTheme } from "../../../lib/screenshot"
 import type { NextApiRequest, NextApiResponse } from 'next'
+import config from '../../../lib/config'
 
-const WORKER_API = process.env.WORKER_API_URL || 'http://localhost:8787'
+const WORKER_API = config.workerApiUrl
 
 async function handleScreenshot(
     req: NextApiRequest,

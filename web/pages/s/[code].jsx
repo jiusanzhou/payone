@@ -45,36 +45,37 @@ const THEME_STYLES = {
 
 const BANNER_THEME_STYLES = {
     default: {
-        containerBg: 'bg-gradient-to-br from-white via-purple-50 to-pink-50',
-        cardBg: 'bg-white/95',
+        containerBg: 'bg-white',
+        cardBg: 'bg-gradient-to-br from-white via-purple-50 to-pink-50',
         titleColor: 'text-gray-800',
         textColor: 'text-gray-500',
         subtitleColor: 'text-gray-400',
     },
     minimal: {
-        containerBg: 'bg-gray-50',
-        cardBg: 'bg-white',
+        containerBg: 'bg-white',
+        cardBg: 'bg-gray-50',
         titleColor: 'text-gray-800',
         textColor: 'text-gray-500',
         subtitleColor: 'text-gray-400',
         border: 'border border-gray-200',
     },
     gradient: {
-        containerBg: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400',
-        cardBg: 'bg-white/95',
-        titleColor: 'text-gray-800',
-        textColor: 'text-gray-600',
-        subtitleColor: 'text-gray-400',
+        containerBg: 'bg-white',
+        cardBg: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400',
+        titleColor: 'text-white',
+        textColor: 'text-white/90',
+        subtitleColor: 'text-white/70',
+        qrRing: 'ring-white/20',
     },
     dark: {
-        containerBg: 'bg-gray-900',
-        cardBg: 'bg-gray-800',
+        containerBg: 'bg-white',
+        cardBg: 'bg-gray-900',
         titleColor: 'text-white',
         textColor: 'text-gray-300',
         subtitleColor: 'text-gray-500',
     },
     neon: {
-        containerBg: 'bg-black',
+        containerBg: 'bg-white',
         cardBg: 'bg-black',
         titleColor: 'text-green-400',
         textColor: 'text-gray-400',
@@ -104,6 +105,7 @@ const BannerLayout = ({ data, qrcode, activeChannels, colorTheme = 'default' }) 
                                 />
                             )}
                         </div>
+                        <p className={`text-center text-xs mt-2 ${style.subtitleColor}`}>请打开支持的付款软件并扫一扫</p>
                     </div>
                     
                     <div className="flex-1 text-center md:text-left">
@@ -119,10 +121,10 @@ const BannerLayout = ({ data, qrcode, activeChannels, colorTheme = 'default' }) 
                                 <div 
                                     key={name}
                                     className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full"
-                                    style={{ backgroundColor: colorTheme === 'dark' || colorTheme === 'neon' ? `${color}30` : `${color}20` }}
+                                    style={{ backgroundColor: (colorTheme === 'dark' || colorTheme === 'neon' || colorTheme === 'gradient') ? `${color}30` : `${color}20` }}
                                 >
                                     <img src={logo} alt={title} className="w-4 h-4 md:w-5 md:h-5" />
-                                    <span className={`text-xs md:text-sm font-medium ${colorTheme === 'dark' ? 'text-gray-200' : colorTheme === 'neon' ? 'text-green-400' : 'text-gray-700'}`}>{title}</span>
+                                    <span className={`text-xs md:text-sm font-medium ${colorTheme === 'dark' ? 'text-gray-200' : colorTheme === 'neon' ? 'text-green-400' : colorTheme === 'gradient' ? 'text-white/90' : 'text-gray-700'}`}>{title}</span>
                                 </div>
                             ))}
                         </div>

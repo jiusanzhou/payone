@@ -28,6 +28,7 @@ export interface ScreenshotData {
     title?: string
     subtitle?: string
     excerpt?: string
+    tip?: string
     channels: PaymentChannelData[]
     pageUrl: string
     isBanner?: boolean

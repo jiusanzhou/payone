@@ -1,3 +1,5 @@
+import config from './config'
+
 export type LayoutType = 'default' | 'banner'
 export type ColorTheme = 'default' | 'minimal' | 'gradient' | 'dark' | 'neon'
 
@@ -114,7 +116,7 @@ export class ExternalProvider implements ScreenshotProvider {
     protected buildPageUrl(ctx: ScreenshotContext, options: ScreenshotOptions): string {
         let host = ctx.host
         if (/localhost|127.0.0.1/.test(host)) {
-            host = 'payone.wencai.app'
+            host = new URL(config.baseUrl).host
         }
 
         const params: string[] = []
@@ -193,7 +195,7 @@ export class ThumioProvider implements ScreenshotProvider {
     protected buildPageUrl(ctx: ScreenshotContext, options: ScreenshotOptions): string {
         let host = ctx.host
         if (/localhost|127.0.0.1/.test(host)) {
-            host = 'payone.wencai.app'
+            host = new URL(config.baseUrl).host
         }
 
         const params: string[] = []
@@ -237,7 +239,7 @@ export class ApiFlashProvider implements ScreenshotProvider {
     protected buildPageUrl(ctx: ScreenshotContext, options: ScreenshotOptions): string {
         let host = ctx.host
         if (/localhost|127.0.0.1/.test(host)) {
-            host = 'payone.wencai.app'
+            host = new URL(config.baseUrl).host
         }
 
         const params: string[] = []
@@ -298,21 +300,25 @@ registry.register(new ExternalProvider('microlink', {
     },
 }))
 
-registry.register(new ExternalProvider('shotsapi', {
-    endpoint: 'https://shot.screenshotapi.net/screenshot',
-    targetUrlKey: 'url',
-    defaultOptions: {
-        full_page: true,
-        output: 'image',
-        file_type: 'png',
-    },
-    mapKeys: {
-        waitUntil: 'wait_for_event',
-        ext: 'file_type',
-    },
-}))
+const SHOTSAPI_TOKEN = process.env.SHOTSAPI_TOKEN || ''
+if (SHOTSAPI_TOKEN) {
+    registry.register(new ExternalProvider('shotsapi', {
+        endpoint: 'https://shot.screenshotapi.net/screenshot',
+        targetUrlKey: 'url',
+        defaultOptions: {
+            full_page: true,
+            output: 'image',
+            file_type: 'png',
+            token: SHOTSAPI_TOKEN,
+        },
+        mapKeys: {
+            waitUntil: 'wait_for_event',
+            ext: 'file_type',
+        },
+    }))
+}
 
-const WORKER_API_URL = process.env.WORKER_API_URL || 'http://localhost:8787'
+const WORKER_API_URL = config.workerApiUrl
 registry.register(new WorkerProvider(WORKER_API_URL))
 
 registry.register(new ThumioProvider())
@@ -322,7 +328,7 @@ if (APIFLASH_ACCESS_KEY) {
     registry.register(new ApiFlashProvider(APIFLASH_ACCESS_KEY))
 }
 
-const DEFAULT_PROVIDER = process.env.SCREENSHOT_PROVIDER || 'worker'
+const DEFAULT_PROVIDER = config.screenshotProvider
 if (registry.has(DEFAULT_PROVIDER)) {
     registry.setDefault(DEFAULT_PROVIDER)
 }

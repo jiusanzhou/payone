@@ -5,12 +5,14 @@ import Confetti from 'react-confetti'
 import Link from "../../components/link"
 import { getBasePath } from "../../lib/utils"
 import { showToast } from "../../components/toast"
+import { registry } from "../../lib/screenshot"
 
-const PROVIDERS = [
+const ALL_PROVIDERS = [
     { id: 'worker', name: 'Worker' },
     { id: 'thumio', name: 'Thum.io' },
     { id: 'microlink', name: 'Microlink' },
     { id: 'shotsapi', name: 'ShotsAPI' },
+    { id: 'apiflash', name: 'ApiFlash' },
 ]
 
 const LAYOUTS = [
@@ -26,9 +28,20 @@ const COLOR_THEMES = [
     { id: 'neon', name: '霓虹' },
 ]
 
-const UsagePage = () => {
+export async function getServerSideProps() {
+    const availableProviders = registry.list()
+    return {
+        props: {
+            availableProviders,
+        },
+    }
+}
+
+const UsagePage = ({ availableProviders = [] }) => {
     const router = useRouter()
     const { code, isnew } = router.query
+
+    const providers = ALL_PROVIDERS.filter(p => availableProviders.includes(p.id))
 
     const [basePath, setBasePath] = useState("")
     const [copied, setCopied] = useState(null)
@@ -203,7 +216,7 @@ const UsagePage = () => {
                   <div>
                             <label className="text-xs text-gray-500 mb-2 block">截图服务</label>
                             <div className="flex gap-1">
-                                {PROVIDERS.map((p) => (
+                                {providers.map((p) => (
                                     <button
                                         key={p.id}
                                         onClick={() => handleProviderChange(p.id)}

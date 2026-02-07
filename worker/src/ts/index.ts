@@ -10,24 +10,29 @@ interface Env {
     STORE_TYPE?: string;
     TINYURL_API_TOKEN?: string;
     SCREENSHOT_PROVIDER?: string;
+    BASE_URL?: string;
 }
 
 let svr: Server | null = null;
+let cachedBaseUrl: string | null = null;
 
 function getServer(env: Env): Server {
-    if (svr) return svr;
+    const baseUrl = env.BASE_URL || 'https://payone.wencai.app';
     
-    svr = new Server({ basicUrl: 'https://payone.wencai.app/s/' });
+    if (svr && cachedBaseUrl === baseUrl) return svr;
+    
+    cachedBaseUrl = baseUrl;
+    svr = new Server({ basicUrl: `${baseUrl}/s/` });
     
     if (env && env.PAYONE_KV) {
         svr.setStore(new CloudflareKVStore(env.PAYONE_KV));
     } else if (env && env.STORE_TYPE === 'tinyurl') {
         svr.setStore(new TinyURLStore({ 
-            basicUrl: 'https://payone.wencai.app/s',
+            basicUrl: `${baseUrl}/s`,
             apiToken: env.TINYURL_API_TOKEN 
         }));
     } else if (env && env.STORE_TYPE === 'isgd') {
-        svr.setStore(new IsGdStore({ basicUrl: 'https://payone.wencai.app/s' }));
+        svr.setStore(new IsGdStore({ basicUrl: `${baseUrl}/s` }));
     }
     
     return svr;
@@ -135,6 +140,7 @@ router.options('/api/s/:code', async () => {
 
 router.get('/api/screenshot/:code', async (ctx) => {
     const server = getServer(ctx.env);
+    const baseUrl = ctx.env.BASE_URL || 'https://payone.wencai.app';
     const code = ctx.params.code as string;
     const urlObj = new URL(ctx.request.url);
 
@@ -160,7 +166,7 @@ router.get('/api/screenshot/:code', async (ctx) => {
         .map((c: any) => ({
             name: c.name,
             title: c.title,
-            logo: `https://payone.wencai.app${c.logo}`,
+            logo: `${baseUrl}${c.logo}`,
             color: c.color,
             value: channelsData?.[c.name] || '',
         }));
@@ -170,8 +176,9 @@ router.get('/api/screenshot/:code', async (ctx) => {
         title: channelsData?._title,
         subtitle: channelsData?._subtitle,
         excerpt: channelsData?._excerpt,
+        tip: channelsData?._tip || '请打开支持的付款软件并扫一扫',
         channels: activeChannels,
-        pageUrl: `https://payone.wencai.app/s/${cleanCode}`,
+        pageUrl: `${baseUrl}/s/${cleanCode}`,
         isBanner: layout === 'banner',
     };
 
