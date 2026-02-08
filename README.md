@@ -173,13 +173,13 @@ npm run start
 | 变量名 | 说明 | 默认值 | 示例 |
 |--------|------|--------|------|
 | `WORKER_API_URL` | Worker API 地址 | `http://localhost:8787` | `https://your-worker.workers.dev` |
-| `SCREENSHOT_PROVIDER` | 截图服务提供者 | `worker` | `worker` / `microlink` / `shotsapi` |
+| `SCREENSHOT_PROVIDER` | 截图服务提供者 | `microlink` | `microlink` / `worker` / `thumio` |
 
 在 `web/.env.local` 中配置：
 
 ```env
 WORKER_API_URL=https://your-worker.workers.dev
-SCREENSHOT_PROVIDER=worker
+SCREENSHOT_PROVIDER=microlink
 ```
 
 ---
@@ -321,7 +321,22 @@ STORE_TYPE = "gitio"
 
 项目支持为收款码生成分享图片，通过 `SCREENSHOT_PROVIDER` 配置：
 
-### Worker / Satori（推荐，默认）
+### Microlink（默认）
+
+使用 Microlink 截图服务，真实浏览器渲染。
+
+```env
+SCREENSHOT_PROVIDER=microlink
+```
+
+**特点：**
+- 真实浏览器渲染
+- 免费额度有限
+- 无需配置即可使用
+
+---
+
+### Worker / Satori
 
 使用 Satori + Resvg 在 Worker 内直接渲染，无外部依赖。
 
@@ -348,21 +363,6 @@ SCREENSHOT_PROVIDER=thumio
 - 完全免费，无限制
 - 无需 API Key
 - 支持自定义尺寸
-
----
-
-### Microlink
-
-使用 Microlink 截图服务。
-
-```env
-SCREENSHOT_PROVIDER=microlink
-```
-
-**特点：**
-- 真实浏览器渲染
-- 免费额度有限
-- 需要网络请求
 
 ---
 
@@ -483,8 +483,8 @@ globs = ["**/*.wasm"]
 # Worker API 地址
 WORKER_API_URL=https://payone.your-domain.workers.dev
 
-# 截图服务提供者: worker | microlink | shotsapi
-SCREENSHOT_PROVIDER=worker
+# 截图服务提供者: microlink (默认) | worker | thumio | shotsapi | apiflash
+SCREENSHOT_PROVIDER=microlink
 ```
 
 

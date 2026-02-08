@@ -9,7 +9,7 @@ const config = {
         ? 'http://localhost:3000' 
         : 'https://payone.wencai.app'),
     
-    screenshotProvider: process.env.SCREENSHOT_PROVIDER || 'worker',
+    screenshotProvider: process.env.SCREENSHOT_PROVIDER || 'microlink',
     
     isDev,
 }
