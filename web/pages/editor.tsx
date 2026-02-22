@@ -221,10 +221,10 @@ const Editor: EditorPageComponent = () => {
                 <div className="bg-gray-50 rounded-xl p-4 mb-6">
                     <div className="flex items-center justify-between mb-3">
                         <span className="text-sm text-gray-500">已添加的渠道</span>
-                        <span className="text-xs text-gray-400">{channelCount}/3</span>
+                        <span className="text-xs text-gray-400">{channelCount} 个</span>
                     </div>
-                    <div className="space-y-2">
-                        {channels.map(({ name, logo, title, disable }) => (
+                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                        {channels.map(({ name, logo, title, disable, limited, limitedReason }) => (
                             <div key={name} className="flex items-center justify-between p-3 bg-white rounded-lg">
                                 <div className="flex items-center gap-3 min-w-0 flex-1">
                                     <img
@@ -233,7 +233,13 @@ const Editor: EditorPageComponent = () => {
                                         className={`w-8 h-8 flex-shrink-0 ${disable ? 'grayscale opacity-50' : ''}`}
                                     />
                                     <div className="min-w-0 flex-1">
-                                        <span className={disable ? 'text-gray-400' : ''}>{title}</span>
+                                        <span className={disable ? 'text-gray-400' : ''}>
+                                            {title}
+                                            {limited && <span className="ml-1 text-xs text-orange-500">⚠️</span>}
+                                        </span>
+                                        {limited && limitedReason && (
+                                            <p className="text-xs text-orange-400">{limitedReason}</p>
+                                        )}
                                         {data[name] && (
                                             <p className="text-xs text-gray-400 truncate" title={data[name] || undefined}>
                                                 {data[name]}

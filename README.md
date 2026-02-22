@@ -15,7 +15,7 @@
 - 🌎️ 支持 Vercel + Cloudflare Workers 部署
 - 👆 一键生成收款页面
 - 🖥️ 自动识别并生成对应平台二维码（支付宝自动跳转）
-- 🛠 支持支付宝、微信、QQ钱包
+- 🛠 支持支付宝、微信（受限）、QQ钱包、PayPal、Venmo、Ko-fi、爱发电、加密货币
 
 
 ## 🖼️ 预览
@@ -120,11 +120,29 @@ payone/
 
 ## 💳 支持的支付渠道
 
-| 渠道 | URL 模式 | 功能 |
-|------|----------|------|
-| 支付宝 | `https://qr.alipay.com/` | 支持自动重定向 |
-| 微信支付 | `wxp://` | 长按识别二维码 |
-| QQ钱包 | `https://i.qianbao.qq.com/...` | 已启用 |
+| 渠道 | URL 模式 | 状态 | 说明 |
+|------|----------|------|------|
+| 支付宝 | `https://qr.alipay.com/` | ✅ 完美支持 | 自动重定向，体验最佳 |
+| 微信支付 | `wxp://` | ⚠️ 受限 | 微信屏蔽了转账码识别，需长按保存后扫一扫 |
+| QQ钱包 | `https://i.qianbao.qq.com/` | ✅ 支持 | |
+| PayPal | `https://paypal.me/` | ✅ 支持 | 跳转 PayPal.Me 链接 |
+| Venmo | `https://venmo.com/` | ✅ 支持 | 美国用户常用 |
+| Ko-fi | `https://ko-fi.com/` | ✅ 支持 | 创作者打赏平台 |
+| 爱发电 | `https://afdian.com/a/` | ✅ 支持 | 国内创作者打赏平台 |
+| Bitcoin | `bitcoin:` | ✅ 支持 | 加密货币 |
+| Ethereum | `ethereum:` | ✅ 支持 | 加密货币 |
+| USDT (TRC20) | `tron:` | ✅ 支持 | 稳定币，TRC20 网络 |
+
+### ⚠️ 微信支付限制说明
+
+由于微信官方限制，个人转账二维码（`wxp://` 协议）在微信内被屏蔽识别，**无法实现扫码直接支付**。
+
+目前可行的方案：
+1. 用户用微信扫码后，显示引导页面
+2. 提示用户"长按保存图片，返回微信首页扫一扫"
+3. 用户从相册识别二维码完成支付
+
+如需微信内直接支付，需申请**微信支付商户**（需企业资质）或开发**小程序**承接。
 
 
 ## 🚀 快速开始
@@ -173,13 +191,13 @@ npm run start
 | 变量名 | 说明 | 默认值 | 示例 |
 |--------|------|--------|------|
 | `WORKER_API_URL` | Worker API 地址 | `http://localhost:8787` | `https://your-worker.workers.dev` |
-| `SCREENSHOT_PROVIDER` | 截图服务提供者 | `worker` | `worker` / `microlink` / `shotsapi` |
+| `SCREENSHOT_PROVIDER` | 截图服务提供者 | `microlink` | `microlink` / `worker` / `thumio` |
 
 在 `web/.env.local` 中配置：
 
 ```env
 WORKER_API_URL=https://your-worker.workers.dev
-SCREENSHOT_PROVIDER=worker
+SCREENSHOT_PROVIDER=microlink
 ```
 
 ---
@@ -321,7 +339,22 @@ STORE_TYPE = "gitio"
 
 项目支持为收款码生成分享图片，通过 `SCREENSHOT_PROVIDER` 配置：
 
-### Worker / Satori（推荐，默认）
+### Microlink（默认）
+
+使用 Microlink 截图服务，真实浏览器渲染。
+
+```env
+SCREENSHOT_PROVIDER=microlink
+```
+
+**特点：**
+- 真实浏览器渲染
+- 免费额度有限
+- 无需配置即可使用
+
+---
+
+### Worker / Satori
 
 使用 Satori + Resvg 在 Worker 内直接渲染，无外部依赖。
 
@@ -348,21 +381,6 @@ SCREENSHOT_PROVIDER=thumio
 - 完全免费，无限制
 - 无需 API Key
 - 支持自定义尺寸
-
----
-
-### Microlink
-
-使用 Microlink 截图服务。
-
-```env
-SCREENSHOT_PROVIDER=microlink
-```
-
-**特点：**
-- 真实浏览器渲染
-- 免费额度有限
-- 需要网络请求
 
 ---
 
@@ -483,8 +501,8 @@ globs = ["**/*.wasm"]
 # Worker API 地址
 WORKER_API_URL=https://payone.your-domain.workers.dev
 
-# 截图服务提供者: worker | microlink | shotsapi
-SCREENSHOT_PROVIDER=worker
+# 截图服务提供者: microlink (默认) | worker | thumio | shotsapi | apiflash
+SCREENSHOT_PROVIDER=microlink
 ```
 
 

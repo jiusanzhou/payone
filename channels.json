@@ -16,8 +16,10 @@
         "ua": "MicroMessenger",
         "logo": "/assets/img/wechat-logo.svg",
         "color": "#54bc6e",
-        "tip": "☝️ 长按并识别二维码",
-        "url": "wxp://"
+        "tip": "⚠️ 微信限制：请长按保存图片，返回微信扫一扫",
+        "url": "wxp://",
+        "limited": true,
+        "limitedReason": "微信屏蔽了转账二维码识别，无法直接扫码支付"
     },
     {
         "name": "qq",
@@ -27,5 +29,68 @@
         "color": "#faae09",
         "disable": false,
         "url": "https://i.qianbao.qq.com/wallet/sqrcode.htm?m=tenpay&a=1&"
+    },
+    {
+        "name": "paypal",
+        "title": "PayPal",
+        "logo": "/assets/img/paypal-logo.svg",
+        "color": "#003087",
+        "tip": "点击链接或扫码前往 PayPal 付款",
+        "url": "https://paypal.me/",
+        "redirect": true
+    },
+    {
+        "name": "venmo",
+        "title": "Venmo",
+        "logo": "/assets/img/venmo-logo.svg",
+        "color": "#3D95CE",
+        "tip": "点击链接或扫码前往 Venmo 付款",
+        "url": "https://venmo.com/",
+        "redirect": true
+    },
+    {
+        "name": "kofi",
+        "title": "Ko-fi",
+        "logo": "/assets/img/kofi-logo.svg",
+        "color": "#FF5E5B",
+        "tip": "点击链接前往 Ko-fi 支持",
+        "url": "https://ko-fi.com/",
+        "redirect": true
+    },
+    {
+        "name": "afdian",
+        "title": "爱发电",
+        "logo": "/assets/img/afdian-logo.svg",
+        "color": "#946CE6",
+        "tip": "点击链接前往爱发电支持",
+        "url": "https://afdian.com/a/",
+        "redirect": true
+    },
+    {
+        "name": "btc",
+        "title": "Bitcoin",
+        "logo": "/assets/img/btc-logo.svg",
+        "color": "#F7931A",
+        "tip": "扫码或复制地址到钱包转账",
+        "url": "bitcoin:",
+        "crypto": true
+    },
+    {
+        "name": "eth",
+        "title": "Ethereum",
+        "logo": "/assets/img/eth-logo.svg",
+        "color": "#627EEA",
+        "tip": "扫码或复制地址到钱包转账",
+        "url": "ethereum:",
+        "crypto": true
+    },
+    {
+        "name": "usdt",
+        "title": "USDT (TRC20)",
+        "logo": "/assets/img/usdt-logo.svg",
+        "color": "#26A17B",
+        "tip": "扫码或复制地址到钱包转账 (TRC20 网络)",
+        "url": "tron:",
+        "crypto": true
     }
 ]

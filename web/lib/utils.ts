@@ -26,6 +26,7 @@ export const getChannelByUA = (ua?: string): Q | null => {
     const channelsList = channels as ChannelConfig[];
     for (let i = 0; i < channelsList.length; i++) {
         const q = channelsList[i];
+        if (!q.ua) continue;
         const testUA = ua || (typeof navigator !== 'undefined' ? navigator.userAgent : '');
         if (q.ua === testUA || new RegExp(q.ua).test(testUA)) {
             return new Q(q);

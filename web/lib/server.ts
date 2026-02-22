@@ -4,7 +4,7 @@ import channels from "../../channels.json";
 export interface ChannelConfig {
     name: string;
     title: string;
-    ua: string;
+    ua?: string;
     url: string;
     logo?: string;
     logoFull?: string;
@@ -12,6 +12,9 @@ export interface ChannelConfig {
     tip?: string;
     color?: string;
     disable?: boolean;
+    limited?: boolean;
+    limitedReason?: string;
+    crypto?: boolean;
 }
 
 export interface ServerOptions {
@@ -26,15 +29,16 @@ export type CreateItemResult = [boolean, string | null, string | null];
 class Q {
     config: ChannelConfig;
     name: string;
-    private _regexua: RegExp;
+    private _regexua: RegExp | null;
 
     constructor(config: ChannelConfig) {
         this.config = config;
         this.name = config.name;
-        this._regexua = new RegExp(this.config.ua);
+        this._regexua = config.ua ? new RegExp(config.ua) : null;
     }
 
     match(ua: string): boolean {
+        if (!this.config.ua) return false;
         if (this.config.ua === ua) return true;
         if (this._regexua === null) return false;
         return this._regexua.test(ua);
