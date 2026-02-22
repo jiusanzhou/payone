@@ -306,15 +306,17 @@ const CodePage: CodePageComponent = ({ isPreview, type, sectionProps = {}, class
             {...sectionProps}
             description={!channel || data[channel.name] ? data._excerpt : '仅支持以上付款方式 ☝️'}
             title={
-                <div className="flex text-xl space-x-4">
-                    {(channels as ChannelConfig[])
-                        .filter(({ disable, name }) => !disable && (!channel || (data[channel.name] ? name === channel.name : data[name])))
-                        .map(({ name, title, logo, logoFull }) => (
-                            <div key={name} className="flex items-center">
-                                <img className="h-10" src={channel && data[channel.name] ? logoFull || logo : logo} alt={title} />
-                                {channel && data[channel.name] && !logoFull && <p className="ml-2 text-md">{title}</p>}
-                            </div>
-                        ))}
+                <div className="flex flex-wrap justify-center gap-3">
+                    {activeChannels.map(({ name, title, logo, logoFull }) => (
+                        <div key={name} className="flex items-center">
+                            <img 
+                                className="h-8 w-8" 
+                                src={channel && data[channel.name] && name === channel.name ? logoFull || logo : logo} 
+                                alt={title} 
+                                title={title}
+                            />
+                        </div>
+                    ))}
                 </div>
             }
         >
