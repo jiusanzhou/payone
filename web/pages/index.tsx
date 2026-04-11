@@ -68,8 +68,8 @@ const Home = () => {
 
             <div className="text-center">
                 <p className="text-gray-400 mb-4">看看效果</p>
-                <Link href="/s/zoe" className="text-purple-500 hover:text-purple-600 font-medium">
-                    /s/zoe →
+                <Link href="/usage/zoe" className="text-purple-500 hover:text-purple-600 font-medium">
+                    查看示例 →
                 </Link>
             </div>
         </div>

@@ -20,8 +20,8 @@ interface PageComponent {
 
 const actions = [
     {
-        href: '/s/zoe',
-        title: '看看示例',
+        href: '/usage/zoe',
+        title: '查看示例',
     },
     {
         href: 'https://github.com/jiusanzhou/payone',

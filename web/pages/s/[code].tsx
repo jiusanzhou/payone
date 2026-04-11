@@ -36,6 +36,63 @@ interface BannerThemeStyle {
     qrRing?: string
 }
 
+interface GridThemeStyle {
+    containerBg: string
+    cardBg: string
+    titleColor: string
+    textColor: string
+    subtitleColor: string
+    channelNameColor: string
+    border?: string
+    shadow?: string
+}
+
+const GRID_THEME_STYLES: Record<string, GridThemeStyle> = {
+    default: {
+        containerBg: 'bg-gradient-to-br from-purple-50 via-white to-pink-50',
+        cardBg: 'bg-white',
+        titleColor: 'text-gray-800',
+        textColor: 'text-gray-500',
+        subtitleColor: 'text-gray-400',
+        channelNameColor: 'text-gray-700',
+    },
+    minimal: {
+        containerBg: 'bg-white',
+        cardBg: 'bg-gray-50',
+        titleColor: 'text-gray-800',
+        textColor: 'text-gray-500',
+        subtitleColor: 'text-gray-400',
+        channelNameColor: 'text-gray-600',
+        border: 'border border-gray-200',
+    },
+    gradient: {
+        containerBg: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400',
+        cardBg: 'bg-white/15 backdrop-blur-sm',
+        titleColor: 'text-white',
+        textColor: 'text-white/80',
+        subtitleColor: 'text-white/60',
+        channelNameColor: 'text-white/90',
+    },
+    dark: {
+        containerBg: 'bg-gray-900',
+        cardBg: 'bg-gray-800',
+        titleColor: 'text-white',
+        textColor: 'text-gray-300',
+        subtitleColor: 'text-gray-500',
+        channelNameColor: 'text-gray-200',
+    },
+    neon: {
+        containerBg: 'bg-black',
+        cardBg: 'bg-gray-900',
+        titleColor: 'text-green-400',
+        textColor: 'text-gray-400',
+        subtitleColor: 'text-green-400/70',
+        channelNameColor: 'text-green-400',
+        border: 'border border-green-400/30',
+        shadow: 'shadow-[0_0_15px_rgba(0,255,136,0.15)]',
+    },
+}
+
 const _emptyObject: PaymentData = {}
 
 const THEME_STYLES: Record<string, ThemeStyle> = {
@@ -109,6 +166,89 @@ const BANNER_THEME_STYLES: Record<string, BannerThemeStyle> = {
         border: 'border border-green-400/50',
         shadow: 'shadow-[0_0_30px_rgba(0,255,136,0.2)]',
     },
+}
+
+interface GridLayoutProps {
+    data: PaymentData
+    activeChannels: ChannelConfig[]
+    colorTheme?: string
+    cols?: number
+}
+
+const GridLayout = ({ data, activeChannels, colorTheme = 'default', cols = 0 }: GridLayoutProps) => {
+    const style = GRID_THEME_STYLES[colorTheme] || GRID_THEME_STYLES.default
+    const [qrcodes, setQrcodes] = useState<Record<string, string>>({})
+
+    const actualCols = cols > 0 ? cols : activeChannels.length <= 2 ? activeChannels.length : activeChannels.length <= 4 ? 2 : 3
+
+    useEffect(() => {
+        const generateQrcodes = async () => {
+            const codes: Record<string, string> = {}
+            for (const ch of activeChannels) {
+                const channelConfig = (channels as ChannelConfig[]).find((c) => c.name === ch.name)
+                if (channelConfig && data[ch.name]) {
+                    const url = channelConfig.url.indexOf('{}') < 0
+                        ? channelConfig.url + data[ch.name]
+                        : channelConfig.url.replace('{}', data[ch.name] as string)
+                    codes[ch.name] = await QRCode.toDataURL(url, { width: 256, margin: 2 })
+                }
+            }
+            setQrcodes(codes)
+        }
+        generateQrcodes()
+    }, [activeChannels, data])
+
+    const gridColsClass = actualCols === 1 ? 'grid-cols-1' : actualCols === 2 ? 'grid-cols-2' : actualCols === 3 ? 'grid-cols-3' : 'grid-cols-4'
+
+    return (
+        <div className={`flex-1 flex flex-col items-center min-h-screen p-6 md:p-8 ${style.containerBg}`}>
+            <Head>
+                <title>{data._title || '支持我们'} | PayOne</title>
+            </Head>
+
+            <div className="max-w-4xl w-full">
+                {(data._title || data._excerpt) && (
+                    <div className="text-center mb-6 md:mb-8">
+                        {data._title && (
+                            <h1 className={`text-2xl md:text-3xl font-bold mb-2 ${style.titleColor}`}>
+                                {data._title}
+                            </h1>
+                        )}
+                        {data._excerpt && (
+                            <p className={`text-sm md:text-base ${style.textColor}`}>{data._excerpt}</p>
+                        )}
+                    </div>
+                )}
+
+                <div className={`grid ${gridColsClass} gap-4 md:gap-6`}>
+                    {activeChannels.map(({ name, title, logo }) => (
+                        <div
+                            key={name}
+                            className={`flex flex-col items-center p-4 md:p-6 rounded-2xl ${style.cardBg} ${style.border || ''} ${style.shadow || ''} shadow-sm`}
+                        >
+                            <div className="flex items-center gap-2 mb-3">
+                                <img src={logo} alt={title} className="w-6 h-6" />
+                                <span className={`font-medium text-sm ${style.channelNameColor}`}>{title}</span>
+                            </div>
+                            <div className="bg-white rounded-xl p-2 shadow-sm">
+                                {qrcodes[name] ? (
+                                    <img src={qrcodes[name]} alt={`${title} 二维码`} className="w-32 h-32 md:w-40 md:h-40" />
+                                ) : (
+                                    <div className="w-32 h-32 md:w-40 md:h-40 flex items-center justify-center">
+                                        <div className="w-6 h-6 border-2 border-purple-200 border-t-purple-500 rounded-full animate-spin"></div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {data._subtitle && (
+                    <p className={`text-center mt-6 text-sm ${style.subtitleColor}`}>{data._subtitle}</p>
+                )}
+            </div>
+        </div>
+    )
 }
 
 interface BannerLayoutProps {
@@ -201,6 +341,8 @@ const CodePage: CodePageComponent = ({ isPreview, type, sectionProps = {}, class
     const currentLayout = layout || 'default'
     const currentTheme = theme || 'default'
     const isBanner = currentLayout === 'banner'
+    const isGrid = currentLayout === 'grid'
+    const gridCols = router.query.cols ? parseInt(router.query.cols as string, 10) : 0
     const themeStyle = THEME_STYLES[currentTheme] || THEME_STYLES.default
 
     useEffect(() => {
@@ -298,6 +440,10 @@ const CodePage: CodePageComponent = ({ isPreview, type, sectionProps = {}, class
 
     if (isBanner) {
         return <BannerLayout data={data} qrcode={qrcode} activeChannels={activeChannels} colorTheme={currentTheme} />
+    }
+
+    if (isGrid) {
+        return <GridLayout data={data} activeChannels={activeChannels} colorTheme={currentTheme} cols={gridCols} />
     }
 
     return (
