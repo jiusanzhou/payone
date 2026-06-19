@@ -29,4 +29,5 @@ npm-debug.log*
 # OS
 Thumbs.db
 
-.wrangler
+.wrangler.backup/
+worker/.wrangler/

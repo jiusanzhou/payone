@@ -1,8 +1,28 @@
-import { getProvider, ScreenshotContext, ScreenshotOptions, LayoutType, ColorTheme } from "../../../lib/screenshot"
 import type { NextApiRequest, NextApiResponse } from 'next'
+import Server from '../../../lib/server'
+import { CloudflareKVStore, type PaymentData } from '../../../lib/store'
+import { createRestKVFromEnv } from '../../../lib/cf-kv'
 import config from '../../../lib/config'
+import { getProvider, ScreenshotContext, ScreenshotOptions, LayoutType, ColorTheme } from '../../../lib/screenshot'
 
-const WORKER_API = config.workerApiUrl
+// One Server instance per Vercel function cold start.
+let svr: Server | null = null
+function getServer(): Server {
+    if (svr) return svr
+    svr = new Server({ basicUrl: `${config.baseUrl}/s/` })
+    try {
+        const kv = createRestKVFromEnv()
+        const store = new CloudflareKVStore({
+            kvNamespace: kv,
+            basicUrl: `${config.baseUrl}/s`,
+        })
+        svr.setStore(store)
+    } catch (e) {
+        // Server without store will return a clear error on use.
+        console.error('[api/s] Failed to init KV store:', (e as Error).message)
+    }
+    return svr
+}
 
 async function handleScreenshot(
     req: NextApiRequest,
@@ -12,7 +32,7 @@ async function handleScreenshot(
 ): Promise<void> {
     const { code, app, provider: providerName, ...args } = req.query as Record<string, string>
     const parts = code.split('.')
-    
+
     let ext: string | undefined
     if (code.indexOf('.') > 0) {
         ext = parts.pop()
@@ -60,7 +80,7 @@ async function handleScreenshot(
 
 async function handleGet(req: NextApiRequest, res: NextApiResponse): Promise<void> {
     const { code, type, layout, theme } = req.query as { code: string; type?: string; layout?: string; theme?: string }
-    
+
     const isBanner = code.includes('-banner.') || code.endsWith('-banner') || layout === 'banner'
     const isImage = code.indexOf('.') !== -1 || type === 'image'
     const currentLayout: LayoutType = isBanner ? 'banner' : 'default'
@@ -72,49 +92,67 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse): Promise<voi
         return
     }
 
-    const workerUrl = `${WORKER_API}/api/s/${code}?type=json`
-    const response = await fetch(workerUrl, {
-        headers: { 'User-Agent': req.headers['user-agent'] || '' }
-    })
-    const data = await response.json()
+    const server = getServer()
+    const ua = (req.headers['user-agent'] as string) || ''
+    const [channel, url, channels, err] = await server.getItem(code, ua)
 
     if (type === 'json') {
-        res.status(200).json(data)
+        if (err) {
+            res.status(200).json({ error: err })
+            return
+        }
+        res.status(200).json({ key: code, channel, url, channels })
         return
     }
 
-    if (data.error) {
-        res.status(500).send(`system error: ${data.error}`)
-    } else {
-        res.redirect(302, data.url)
+    if (err) {
+        res.status(404).send(`not found: ${err}`)
+        return
     }
+
+    res.redirect(302, url!)
 }
 
 async function handlePost(req: NextApiRequest, res: NextApiResponse): Promise<void> {
     const { code } = req.query as { code: string }
-    const workerUrl = `${WORKER_API}/api/s/${code}`
-    
-    const response = await fetch(workerUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(req.body)
-    })
-    const data = await response.json()
-    res.status(200).json(data)
+    const server = getServer()
+    const data = (req.body || {}) as PaymentData
+    const [ok, err, backend] = await server.createItem(code, data)
+    const r: { key: string; data: PaymentData; success: boolean; backend: string | null; error?: string } = {
+        key: code,
+        data,
+        success: ok,
+        backend,
+    }
+    if (!ok && err) r.error = err
+    res.status(200).json(r)
 }
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ): Promise<void> {
-    switch (req.method) {
-        case 'GET':
-            await handleGet(req, res)
-            break
-        case 'POST':
-            await handlePost(req, res)
-            break
-        default:
-            res.status(405).end()
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+    try {
+        switch (req.method) {
+            case 'OPTIONS':
+                res.status(204).end()
+                return
+            case 'GET':
+                await handleGet(req, res)
+                return
+            case 'POST':
+                await handlePost(req, res)
+                return
+            default:
+                res.status(405).end()
+        }
+    } catch (e) {
+        const msg = (e as Error).message || String(e)
+        console.error('[api/s] uncaught:', msg, (e as Error).stack)
+        res.status(500).json({ error: msg })
     }
 }
