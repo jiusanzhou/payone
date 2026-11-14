@@ -31,3 +31,11 @@ Thumbs.db
 
 .wrangler.backup/
 worker/.wrangler/
+.vercel
+
+# Cloudflare migration
+.env.cf-production
+.env.production
+.dev.vars
+.open-next/
+.wrangler/
