@@ -1,3 +1,4 @@
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -17,5 +18,7 @@ const nextConfig = {
     ];
   }
 }
+
+initOpenNextCloudflareForDev()
 
 export default nextConfig
