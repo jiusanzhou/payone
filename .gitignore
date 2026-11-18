@@ -39,3 +39,6 @@ worker/.wrangler/
 .dev.vars
 .open-next/
 .wrangler/
+
+# local KV data exports (contain production data)
+.backup/
